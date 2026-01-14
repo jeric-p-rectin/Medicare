@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)",
+      "mcp__next-devtools__browser_eval"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "next-devtools",
+    "shadcn"
+  ]
+}

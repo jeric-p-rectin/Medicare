@@ -42,7 +42,7 @@ export default function LoginPage() {
 
       {/* Footer */}
       <p className="text-center text-sm text-gray-500 mt-8">
-        Barangay Health Center Management System
+        Healthcare Management System
       </p>
     </div>
   );

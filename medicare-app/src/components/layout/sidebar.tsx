@@ -6,30 +6,41 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
-  Pill,
-  ClipboardList,
+  UserPlus,
   BarChart3,
   Settings,
   LogOut,
   Menu,
   X,
 } from 'lucide-react';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/students', label: 'Students', icon: Users },
-  { href: '/medicines', label: 'Medicines', icon: Pill },
-  { href: '/records', label: 'Medical Records', icon: ClipboardList },
-  { href: '/reports', label: 'Reports', icon: BarChart3 },
-  { href: '/settings', label: 'Settings', icon: Settings },
+type NavItem = {
+  href: string;
+  label: string;
+  icon: any;
+  roles: string[];
+};
+
+const allNavItems: NavItem[] = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['SUPER_ADMIN', 'ADMIN', 'PATIENT'] },
+  { href: '/patients', label: 'Patients', icon: Users, roles: ['SUPER_ADMIN', 'ADMIN'] },
+  { href: '/registration', label: 'Registration', icon: UserPlus, roles: ['SUPER_ADMIN', 'ADMIN'] },
+  { href: '/statistics', label: 'Statistics', icon: BarChart3, roles: ['SUPER_ADMIN', 'ADMIN'] },
+  { href: '/account', label: 'Account', icon: Settings, roles: ['SUPER_ADMIN', 'ADMIN', 'PATIENT'] },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { data: session } = useSession();
+
+  // Filter navigation items based on user role
+  const navItems = allNavItems.filter(item =>
+    item.roles.includes(session?.user?.role || '')
+  );
 
   const handleLogout = () => {
     signOut({ callbackUrl: '/login' });
@@ -51,13 +62,13 @@ export function Sidebar() {
             <h1 className="text-xl font-bold" style={{ color: '#C41E3A' }}>
               MED-Alert
             </h1>
-            <p className="text-xs text-gray-500">Healthcare System</p>
+            <p className="text-xs text-gray-500">School Clinic System</p>
           </div>
         </Link>
       </div>
 
       {/* Navigation Items */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 min-h-0 p-4 space-y-2 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
           const Icon = item.icon;
@@ -126,7 +137,7 @@ export function Sidebar() {
       )}
 
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex lg:flex-col w-64 bg-white border-r border-gray-100 h-screen sticky top-0">
+      <aside className="hidden lg:flex lg:flex-col w-64 bg-white border-r border-gray-100 h-screen sticky top-0 overflow-hidden">
         <NavContent />
       </aside>
 

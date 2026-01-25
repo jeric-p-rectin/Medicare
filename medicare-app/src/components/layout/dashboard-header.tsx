@@ -1,10 +1,15 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { Bell, Search } from 'lucide-react';
+import { AlertPopover } from '@/components/alerts/alert-popover';
 
-export function DashboardHeader() {
-  const { data: session } = useSession();
+interface DashboardHeaderProps {
+  user?: {
+    name?: string | null;
+    role?: string;
+  };
+}
+
+export function DashboardHeader({ user }: DashboardHeaderProps) {
 
   const getRoleBadgeStyle = (role: string) => {
     switch (role?.toLowerCase()) {
@@ -28,32 +33,11 @@ export function DashboardHeader() {
 
   return (
     <header className="bg-white border-b border-gray-100 px-6 py-4">
-      <div className="flex items-center justify-between">
-        {/* Search Bar */}
-        <div className="flex-1 max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-[#C41E3A] focus:ring-2 focus:ring-red-50 outline-none transition-all"
-            />
-          </div>
-        </div>
-
+      <div className="flex items-center justify-end">
         {/* Right Section */}
-        <div className="flex items-center gap-4 ml-4">
-          {/* Notifications */}
-          <button
-            className="relative p-2 rounded-xl hover:bg-gray-50 transition-colors"
-            title="Notifications"
-          >
-            <Bell className="w-5 h-5 text-gray-600" />
-            <span
-              className="absolute top-1 right-1 w-2 h-2 rounded-full"
-              style={{ background: '#E63946' }}
-            />
-          </button>
+        <div className="flex items-center gap-4">
+          {/* Alert System */}
+          <AlertPopover />
 
           {/* User Info */}
           <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
@@ -63,17 +47,17 @@ export function DashboardHeader() {
                 background: 'linear-gradient(135deg, #C41E3A 0%, #E63946 100%)',
               }}
             >
-              {session?.user?.name?.charAt(0).toUpperCase() || 'U'}
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="hidden sm:block">
               <p className="font-medium text-gray-800">
-                {session?.user?.name || 'User'}
+                {user?.name || 'User'}
               </p>
               <span
                 className="text-xs px-2 py-0.5 rounded-full font-medium"
-                style={getRoleBadgeStyle(session?.user?.role || '')}
+                style={getRoleBadgeStyle(user?.role || '')}
               >
-                {session?.user?.role || 'User'}
+                {user?.role || 'User'}
               </span>
             </div>
           </div>

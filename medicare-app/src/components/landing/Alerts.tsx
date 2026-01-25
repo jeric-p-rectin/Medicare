@@ -5,25 +5,25 @@ import { cn } from '@/lib/utils';
 
 const alerts = [
   {
-    icon: '⚠️',
-    title: 'Low Stock Alert',
-    message: 'Paracetamol (500mg) - 5 units remaining',
-    time: '2 minutes ago',
-    borderColor: '#FF6B6B',
+    icon: '🦠',
+    title: 'Outbreak Alert: Flu Cases Rising',
+    message: '7 flu cases detected this week (threshold: 5 cases)',
+    time: '2 hours ago',
+    borderColor: '#E63946',
   },
   {
-    icon: '📅',
-    title: 'Upcoming Appointment',
-    message: 'Maria Santos - Check-up at 2:00 PM',
-    time: 'Today',
-    borderColor: '#C41E3A',
+    icon: '👥',
+    title: 'Duplicate Record Detected',
+    message: 'Potential match found: 75% similarity (Name, DOB, LRN)',
+    time: '1 day ago',
+    borderColor: '#E63946',
   },
   {
     icon: '🔔',
-    title: 'Expiry Warning',
-    message: 'COVID-19 Vaccine Batch #A123 expires in 7 days',
-    time: '5 hours ago',
-    borderColor: '#FFA726',
+    title: 'Medical Record Updated',
+    message: 'Patient #2024-123456 health status changed',
+    time: '3 days ago',
+    borderColor: '#E63946',
   },
 ];
 
@@ -48,7 +48,7 @@ export function Alerts() {
             )}
             style={{ fontSize: 'clamp(36px, 5vw, 48px)' }}
           >
-            Stay Ahead with Smart Alerts
+            Intelligent Health Monitoring
           </h2>
           <p
             className={cn(
@@ -56,7 +56,7 @@ export function Alerts() {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             )}
           >
-            Real-time notifications keep you informed
+            Real-time outbreak detection, duplicate prevention, and instant notifications
           </p>
         </div>
 

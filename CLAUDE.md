@@ -1,0 +1,371 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+# Project Rules & Context
+
+## Tech Stack
+- **Framework:** Next.js (App Router)
+- **UI Library:** shadcn/ui + Tailwind CSS
+- **Database:** MySQL (accessed via MCP Server)
+- **State Management:** React Hooks / Server Actions
+
+## Rules
+
+### 1. MySQL & Database Interaction (MCP)
+- **Schema First:** Before writing any SQL query, ALWAYS inspect the database schema using the MCP tool. Do not guess column names or table relationships.
+- **🛡️ DESTRUCTIVE ACTION PROTOCOL (Strict):**
+  - **Permission Required:** For any `DELETE`, `DROP`, `TRUNCATE`, or `ALTER` (DDL) operations, you **MUST** pause and ask for explicit user permission first.
+  - **Show SQL First:** Before asking for permission, display the exact SQL query you intend to run.
+  - **No Auto-Execution:** Never execute these destructive commands in the same turn as the plan. Wait for the user to type "Confirm" or "Yes".
+- **Safety Check:** For any `INSERT` or `UPDATE` operations, double-check the `WHERE` clause to avoid accidental massive data changes.
+- **Read-Only Default:** Prefer reading data to answer questions. Only suggest data modification if explicitly requested.
+- **Verification:** After running a complex query, briefly explain how the results answer the user's question.
+
+### 2. Next.js Development
+- **App Router:** Use the Next.js App Router (`app/` directory) conventions.
+- **Server vs. Client:**
+  - Default to **Server Components** for data fetching and database interactions.
+  - Use `'use client'` only for interactive components (forms, buttons, hooks).
+- **Server Actions:** Use Server Actions for database mutations instead of API routes where possible.
+- **Naming:** Use `page.tsx`, `layout.tsx`, `loading.tsx`, and `error.tsx` correctly.
+
+### 3. shadcn/ui & Styling
+- **Installation:** When adding new components, prefer using the CLI command: `npx shadcn@latest add [component-name]`.
+- **Customization:** Don't overwrite shadcn base components directly unless necessary; compose them or wrap them.
+- **Tailwind:** Use utility classes for layout and spacing. Avoid custom CSS files unless absolutely necessary.
+- **Lucide Icons:** Use `lucide-react` for icons as per standard shadcn setup.
+
+## Common Commands
+- **Add Component:** `npx shadcn@latest add`
+- **Database Check:** (Ask Claude) "Inspect schema for [table_name]"
+
+## Project Overview
+
+**MEDICARE** (Medical Data and Information Community Alert Response Engine) is a Next.js 16 web application for managing school clinic operations, patient records, and health outbreak detection for high schools (Grades 7-12).
+
+**Tech Stack:**
+- Next.js 16.1.1 + React 19.2.3 + TypeScript 5
+- NextAuth 5 (beta.30) for JWT authentication
+- MySQL on Aiven (cloud database)
+- Tailwind CSS 4 + Radix UI components
+- React Hook Form + Zod validation
+- SWR for data fetching
+
+## Development Commands
+
+### Setup and Running
+```bash
+cd medicare-app
+
+# Install dependencies
+npm install
+
+# Run development server (http://localhost:3000)
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Run linter
+npm run lint
+```
+
+### Database Setup
+```bash
+# Initial database setup (runs schema.sql, seed.sql, test-data.sql)
+node database/setup-database.js
+```
+
+**Note:** Requires `.env.local` file in `medicare-app/` directory with:
+```
+DB_HOST=<aiven-host>.aivencloud.com
+DB_PORT=3306
+DB_USER=avnadmin
+DB_PASSWORD=<password>
+DB_NAME=defaultdb
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=<generated-secret>
+NODE_ENV=development
+```
+
+**Default Login:** username: `superadmin`, password: `admin123`
+
+## Architecture Overview
+
+### Directory Structure
+```
+medicare-app/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── (auth)/            # Auth route group (login)
+│   │   ├── (dashboard)/       # Protected dashboard routes
+│   │   ├── api/               # API route handlers
+│   │   └── layout.tsx         # Root layout with SessionProvider
+│   ├── components/            # React components
+│   │   ├── layout/           # Navbar, Sidebar, Header
+│   │   ├── landing/          # Landing page sections
+│   │   ├── auth/             # Auth components
+│   │   ├── alerts/           # Alert system UI
+│   │   ├── registration/     # Registration forms
+│   │   └── ui/               # shadcn-style UI primitives
+│   ├── lib/                   # Business logic & utilities
+│   │   ├── db.ts             # Database connection pool & query helpers
+│   │   ├── auth.ts           # NextAuth configuration
+│   │   ├── queries/          # Domain-specific query functions
+│   │   ├── alert-system.ts   # Outbreak detection logic
+│   │   ├── duplicate-detection.ts
+│   │   └── audit-logger.ts
+│   ├── types/                 # TypeScript type definitions
+│   ├── hooks/                 # Custom React hooks
+│   └── middleware.ts          # Auth route protection
+├── database/                  # SQL schema & setup scripts
+└── public/                    # Static assets
+```
+
+### Database Layer
+
+**Connection:** MySQL connection pool in `src/lib/db.ts` with Aiven-compatible SSL settings (5 connection limit for free tier).
+
+**Core Query Functions:**
+- `query<T>(sql, params)` - SELECT returning multiple rows
+- `queryOne<T>(sql, params)` - SELECT returning single row
+- `execute(sql, params)` - INSERT/UPDATE/DELETE operations
+- `transaction(callback)` - Atomic transactions with auto-commit/rollback
+
+**Query Modules:** Domain-specific queries are organized in `src/lib/queries/`:
+- `students.ts` - Student CRUD, search, filtering
+- `alerts.ts` - Alert management
+- `medical-records.ts` - Medical record operations
+- `statistics.ts` - Dashboard statistics
+- `sections.ts` - Academic sections
+- `users.ts` - User authentication
+
+**Database Schema:** 8 core tables:
+- `users` - System users with role-based access (SUPER_ADMIN, ADMIN, PATIENT)
+- `students` - Patient records linked to users (one-to-one)
+- `sections` - Academic sections (Grades 7-12, Sections A-D)
+- `medical_records` - Health visit records with disease tracking
+- `alerts` - System notifications (outbreak alerts, duplicate detection)
+- `duplicate_detections` - Potential duplicate student records
+- `audit_logs` - Compliance tracking for all CRUD operations
+
+### Authentication & Authorization
+
+**NextAuth 5 Configuration** (`src/lib/auth.ts`):
+- Credentials provider (username/password)
+- JWT sessions with 24-hour expiration
+- Password hashing via bcryptjs
+- Last login timestamp tracking
+
+**Middleware Protection** (`src/middleware.ts`):
+- Public routes: `/`, `/login`, `/api/auth/*`
+- Protected routes: `/dashboard/*` (redirects to `/login` if unauthorized)
+
+**Role Hierarchy:**
+- SUPER_ADMIN - Full system access
+- ADMIN - Clinic staff operations
+- PATIENT - Limited student access
+
+### Key System Features
+
+#### 1. Alert System (`src/lib/alert-system.ts`)
+**Outbreak Detection:**
+- Disease-specific thresholds (e.g., Flu: 5 cases/week)
+- Automatic alerts when thresholds exceeded
+- 24-hour spam prevention per disease
+- Severity: CRITICAL (2x threshold) or HIGH (1x threshold)
+
+**Alert Management:**
+- Real-time polling via SWR (30-second refresh)
+- Mark as read/unread
+- Resolve with notes
+- Unread count tracking
+
+#### 2. Duplicate Detection (`src/lib/duplicate-detection.ts`)
+**Matching Logic:**
+- Checks: first name + last name + DOB + LRN
+- Similarity scoring: 25 points per match, min 50% to flag
+- Creates DUPLICATE_DETECTED alerts
+- Resolution tracking (MERGED, KEPT_BOTH, DELETED_ONE)
+
+#### 3. Audit Logging (`src/lib/audit-logger.ts`)
+- Logs all CRUD operations (CREATE, READ, UPDATE, DELETE)
+- Captures IP address and user agent
+- Stores old/new values as JSON
+- Provides compliance audit trail
+
+#### 4. Student Registration
+**Workflow:**
+1. Admin submits registration form (Zod validated)
+2. Duplicate detection runs automatically
+3. If approved → transaction creates user + student record
+4. Generates credentials (username, password, student number)
+5. Displays credentials to admin for communication to student
+
+**Auto-generated Data:**
+- Username: `<firstname><lastname><random4digits>`
+- Student Number: `<year>-<random6digits>`
+- Password: Randomly generated 12-character string
+
+### API Routes
+
+All API routes in `src/app/api/`:
+
+**Students:**
+- `GET /api/students` - List with search/filter/pagination
+- `POST /api/students` - Create new student
+- `GET /api/students/[id]` - Get single student
+- `PUT /api/students/[id]` - Update student
+- `GET /api/students/[id]/records` - Medical records for student
+
+**Alerts:**
+- `GET /api/alerts` - List alerts (filter by unread)
+- `POST /api/alerts` - Create alert
+- `GET /api/alerts/[id]` - Alert details
+- `DELETE /api/alerts/[id]` - Delete alert
+- `PUT /api/alerts/[id]/read` - Mark as read
+
+**Dashboard:**
+- `GET /api/dashboard/stats` - School-wide statistics
+- `GET /api/dashboard/grade/[grade]` - Grade-level breakdown
+
+**Statistics:**
+- `GET /api/statistics` - Disease statistics with time filtering
+
+**Auth:**
+- `/api/auth/[...nextauth]` - NextAuth endpoints
+
+### Component Patterns
+
+**UI Components:** shadcn-style components in `src/components/ui/` (Button, Card, Input, Table, Select, Badge, etc.)
+
+**Hooks:**
+- `useAlerts()` - Alert fetching with SWR, returns: `{ alerts, error, isLoading, unreadCount, markAsRead(), dismissAlert() }`
+
+**Layout Components:**
+- `navbar.tsx` - Landing page navigation
+- `sidebar.tsx` - Dashboard sidebar (grade links 7-12)
+- `dashboard-header.tsx` - Header with user info & alert popover
+
+**Form Validation:**
+- React Hook Form + Zod schemas
+- Validation schemas in `src/lib/validations/`
+
+## Important Architectural Patterns
+
+### 1. Route Groups
+- `(auth)` - Public authentication pages
+- `(dashboard)` - Protected dashboard with shared layout
+
+### 2. Database Transactions
+Always use `transaction()` wrapper for multi-table operations:
+```typescript
+import { transaction } from '@/lib/db';
+
+await transaction(async (conn) => {
+  const [userResult] = await conn.execute(userInsertSQL, userParams);
+  const [studentResult] = await conn.execute(studentInsertSQL, studentParams);
+  return { userId: userResult.insertId, studentId: studentResult.insertId };
+});
+```
+
+### 3. Query Organization
+- Keep raw SQL in `src/lib/queries/` modules
+- Export typed functions, not inline queries
+- Use prepared statements (? placeholders) to prevent SQL injection
+
+### 4. API Route Pattern
+```typescript
+// Always check auth first
+const session = await auth();
+if (!session) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+}
+
+// Validate request body with Zod
+const body = await request.json();
+const validated = schema.parse(body);
+
+// Perform operation
+const result = await queryFunction(validated);
+
+// Return response
+return NextResponse.json(result);
+```
+
+### 5. Real-time Updates
+Use SWR for polling endpoints that need real-time data:
+```typescript
+const { data, error, mutate } = useSWR(
+  '/api/alerts',
+  fetcher,
+  { refreshInterval: 30000 } // 30-second polling
+);
+```
+
+## Design System
+
+**Colors:**
+- Primary: `#C41E3A` (deep red)
+- Accent: `#E63946` (bright red)
+- Background: `#FAFAFA` (off-white)
+
+**Typography:**
+- Primary font: Inter
+- Monospace: Geist Mono
+
+**Component Style:**
+- Gradient effects on buttons/cards
+- Shadow with red tint: `shadow-[0_4px_20px_rgba(196,30,58,0.15)]`
+- Rounded corners: `rounded-xl`, `rounded-2xl`
+
+## Testing & Verification
+
+### Manual Testing Flow
+1. Start dev server: `npm run dev`
+2. Login with superadmin credentials
+3. Navigate to /dashboard - verify grade cards render
+4. Go to /registration - register a test student
+5. Check /patients - verify student appears in list
+6. Go to /alerts - verify alert system loads
+7. Check /statistics - verify charts render
+
+### Database Verification
+```bash
+# After running setup-database.js, verify:
+# - 24 sections (Grades 7-12 × Sections A-D)
+# - 1+ users (superadmin)
+# - Test students (if test-data.sql was loaded)
+```
+
+### Common Issues
+- **Database connection fails:** Check `.env.local` credentials and Aiven SSL settings
+- **Auth not working:** Verify `NEXTAUTH_SECRET` is set and `NEXTAUTH_URL` matches dev server
+- **Build errors:** Run `npm install` to ensure dependencies are current
+
+## Key Files Reference
+
+**Configuration:**
+- `medicare-app/package.json` - Dependencies & scripts
+- `medicare-app/.env.local` - Environment variables (not in git)
+- `database/schema.sql` - Table definitions
+- `database/seed.sql` - Initial data (sections, superadmin)
+
+**Core Logic:**
+- `src/lib/db.ts` - Database abstraction
+- `src/lib/auth.ts` - NextAuth config
+- `src/lib/alert-system.ts` - Outbreak detection
+- `src/lib/duplicate-detection.ts` - Duplicate matching
+- `src/middleware.ts` - Route protection
+
+**Main Pages:**
+- `src/app/(dashboard)/dashboard/page.tsx` - Main dashboard
+- `src/app/(dashboard)/registration/page.tsx` - Student registration
+- `src/app/(dashboard)/patients/page.tsx` - Patient list
+- `src/app/(dashboard)/alerts/page.tsx` - Alert management
+- `src/app/(dashboard)/statistics/page.tsx` - Statistics dashboard
+- `src/app/(auth)/login/page.tsx` - Login page

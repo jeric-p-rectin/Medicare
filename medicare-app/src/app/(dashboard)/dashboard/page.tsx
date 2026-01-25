@@ -1,200 +1,125 @@
-import { Metadata } from 'next';
-import { Users, Package, Calendar, TrendingUp, Bell, Activity } from 'lucide-react';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import type { DashboardStats } from '@/types/statistics';
 
-export const metadata: Metadata = {
-  title: 'Dashboard | MED-Alert',
-  description: 'MED-Alert Dashboard - Healthcare Management System',
-};
+export default function SchoolWideDashboard() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showAccessDenied, setShowAccessDenied] = useState(false);
 
-export default function DashboardPage() {
+  useEffect(() => {
+    // Check for error parameter from middleware redirect
+    if (searchParams.get('error') === 'patient_only') {
+      setShowAccessDenied(true);
+      // Auto-dismiss after 5 seconds
+      setTimeout(() => setShowAccessDenied(false), 5000);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      const response = await fetch('/api/dashboard/stats');
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStudentCountForGrade = (grade: string) => {
+    if (!stats) return 0;
+    const gradeData = stats.gradeStats.find((g) => g.grade === grade);
+    return gradeData?.totalStudents || 0;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-[#C41E3A]" />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">Welcome to MED-Alert Health Center Management System</p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card
-          className="border-0"
-          style={{ boxShadow: '0 4px 12px rgba(196, 30, 58, 0.05)', borderLeft: '4px solid #C41E3A' }}
-        >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Patients</CardTitle>
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(230, 57, 70, 0.1) 100%)' }}
-            >
-              <Users className="w-5 h-5" style={{ color: '#C41E3A' }} />
+    <div className="p-8 min-h-screen bg-[#FAFAFA]">
+      {/* Access Denied Error Message */}
+      {showAccessDenied && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-lg">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <AlertCircle className="h-5 w-5 text-red-400" />
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" style={{ color: '#263238' }}>0</div>
-            <p className="text-xs text-gray-500">Registered patients</p>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="border-0"
-          style={{ boxShadow: '0 4px 12px rgba(196, 30, 58, 0.05)', borderLeft: '4px solid #E63946' }}
-        >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Today's Appointments</CardTitle>
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(230, 57, 70, 0.1) 100%)' }}
-            >
-              <Calendar className="w-5 h-5" style={{ color: '#E63946' }} />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" style={{ color: '#263238' }}>0</div>
-            <p className="text-xs text-gray-500">Scheduled for today</p>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="border-0"
-          style={{ boxShadow: '0 4px 12px rgba(196, 30, 58, 0.05)', borderLeft: '4px solid #C41E3A' }}
-        >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Low Stock Items</CardTitle>
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(230, 57, 70, 0.1) 100%)' }}
-            >
-              <Package className="w-5 h-5" style={{ color: '#C41E3A' }} />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" style={{ color: '#263238' }}>0</div>
-            <p className="text-xs text-gray-500">Need restocking</p>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="border-0"
-          style={{ boxShadow: '0 4px 12px rgba(196, 30, 58, 0.05)', borderLeft: '4px solid #E63946' }}
-        >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Disease Cases</CardTitle>
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(230, 57, 70, 0.1) 100%)' }}
-            >
-              <TrendingUp className="w-5 h-5" style={{ color: '#E63946' }} />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" style={{ color: '#263238' }}>0</div>
-            <p className="text-xs text-gray-500">This month</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions & Alerts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-0" style={{ boxShadow: '0 4px 12px rgba(196, 30, 58, 0.05)' }}>
-          <CardHeader>
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <button className="p-4 text-left rounded-xl border border-gray-100 transition-all duration-200 hover:shadow-md hover:bg-red-50">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                  style={{ background: 'linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(230, 57, 70, 0.1) 100%)' }}
-                >
-                  <Users className="w-5 h-5" style={{ color: '#C41E3A' }} />
-                </div>
-                <p className="font-medium text-gray-800">Register Student</p>
-                <p className="text-sm text-gray-500">Add new student</p>
-              </button>
-
-              <button className="p-4 text-left rounded-xl border border-gray-100 transition-all duration-200 hover:shadow-md hover:bg-red-50">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                  style={{ background: 'linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(230, 57, 70, 0.1) 100%)' }}
-                >
-                  <Calendar className="w-5 h-5" style={{ color: '#E63946' }} />
-                </div>
-                <p className="font-medium text-gray-800">Schedule</p>
-                <p className="text-sm text-gray-500">Book appointment</p>
-              </button>
-
-              <button className="p-4 text-left rounded-xl border border-gray-100 transition-all duration-200 hover:shadow-md hover:bg-red-50">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                  style={{ background: 'linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(230, 57, 70, 0.1) 100%)' }}
-                >
-                  <Package className="w-5 h-5" style={{ color: '#C41E3A' }} />
-                </div>
-                <p className="font-medium text-gray-800">Inventory</p>
-                <p className="text-sm text-gray-500">Manage stock</p>
-              </button>
-
-              <button className="p-4 text-left rounded-xl border border-gray-100 transition-all duration-200 hover:shadow-md hover:bg-red-50">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                  style={{ background: 'linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(230, 57, 70, 0.1) 100%)' }}
-                >
-                  <TrendingUp className="w-5 h-5" style={{ color: '#E63946' }} />
-                </div>
-                <p className="font-medium text-gray-800">Reports</p>
-                <p className="text-sm text-gray-500">View analytics</p>
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0" style={{ boxShadow: '0 4px 12px rgba(196, 30, 58, 0.05)' }}>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Bell className="w-5 h-5" style={{ color: '#C41E3A' }} />
-              Recent Alerts
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-gray-500">
-              <Bell className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>No alerts at this time</p>
-              <p className="text-sm">System alerts will appear here</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Setup Notice */}
-      <Card
-        className="mt-6 border-0"
-        style={{
-          background: 'linear-gradient(135deg, rgba(196, 30, 58, 0.05) 0%, rgba(230, 57, 70, 0.05) 100%)',
-          boxShadow: '0 4px 12px rgba(196, 30, 58, 0.05)',
-        }}
-      >
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-4">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #C41E3A 0%, #E63946 100%)' }}
-            >
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h3 className="font-medium" style={{ color: '#C41E3A' }}>
-                System Setup Complete
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Week 1 and Week 2 implementation is complete. The system includes authentication,
-                database schema, and core infrastructure.
+            <div className="ml-3">
+              <p className="text-sm text-red-700">
+                <strong>Access Denied:</strong> The Patient Portal is only accessible to users with the PATIENT role.
+                {session?.user?.role && ` You are logged in as ${session.user.role}.`}
               </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
+
+      {/* Page Title */}
+      <h2 className="text-3xl font-bold text-gray-800 mb-8">
+        School Wide Dashboard
+      </h2>
+
+      {/* Total Students Card */}
+      <div className="bg-white rounded-2xl shadow-lg shadow-red-500/5 p-8 mb-8">
+        <div className="text-center">
+          <p className="text-lg text-gray-600 mb-4">Total Registered Students</p>
+          <div className="text-7xl font-bold bg-gradient-to-r from-[#C41E3A] to-[#E63946] bg-clip-text text-transparent">
+            {stats?.totalStudents || 0}
+          </div>
+        </div>
+      </div>
+
+      {/* Grade Level Cards */}
+      <div>
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Grade Levels</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          {['7', '8', '9', '10', '11', '12'].map((grade) => (
+            <div
+              key={grade}
+              className="bg-white rounded-2xl shadow-lg shadow-red-500/5 p-6
+                       cursor-pointer hover:shadow-xl hover:-translate-y-2
+                       transition-all duration-300"
+              onClick={() => router.push(`/dashboard/grade/${grade}`)}
+            >
+              <div className="text-center">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full
+                            bg-gradient-to-r from-[#C41E3A] to-[#E63946]
+                            flex items-center justify-center shadow-lg shadow-red-500/30">
+                  <span className="text-4xl font-bold text-white">{grade}</span>
+                </div>
+                <div className="text-3xl font-bold text-gray-800 mb-1">
+                  {getStudentCountForGrade(grade)}
+                </div>
+                <div className="text-sm text-gray-500">Students</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-gray-500 mt-6">
+          Click on a grade level to view sections
+        </p>
+      </div>
     </div>
   );
 }

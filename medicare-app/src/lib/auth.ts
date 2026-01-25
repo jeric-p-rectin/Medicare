@@ -22,16 +22,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Find user by username
         const user = await findUserByUsername(username);
 
-        // Check if user exists and is active
-        if (!user || !user.is_active) {
-          return null;
+        // Check if user exists
+        if (!user) {
+          return null; // Generic error for security
+        }
+
+        // Check if account is disabled
+        if (!user.is_active) {
+          throw new Error('ACCOUNT_DISABLED');
         }
 
         // Verify password
         const isValidPassword = await bcrypt.compare(password, user.password);
 
         if (!isValidPassword) {
-          return null;
+          return null; // Generic error for security
         }
 
         // Update last login timestamp

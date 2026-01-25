@@ -151,7 +151,7 @@ export function Demo() {
                 ⚠
               </div>
               <span className="font-semibold text-medicare-dark-gray whitespace-nowrap">
-                Low Stock Alert
+                Disease Outbreak Alert
               </span>
             </div>
 
@@ -163,7 +163,7 @@ export function Demo() {
                 📅
               </div>
               <span className="font-semibold text-medicare-dark-gray whitespace-nowrap">
-                Appointment Today
+                Patients Management
               </span>
             </div>
           </div>

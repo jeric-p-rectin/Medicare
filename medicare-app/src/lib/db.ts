@@ -37,10 +37,13 @@ if (process.env.NODE_ENV === 'development') {
  */
 export async function query<T extends RowDataPacket>(
   sql: string,
-  params?: (string | number | boolean | Date | null | undefined)[]
+  params?: (string | number | boolean | Date | null)[]
 ): Promise<T[]> {
   try {
-    const [results] = await pool.execute<T[]>(sql, params);
+    // Filter out undefined values and log for debugging
+    const cleanParams = params?.filter(p => p !== undefined);
+    console.log('[DEBUG] Query params:', cleanParams);
+    const [results] = await pool.execute<T[]>(sql, cleanParams);
     return results;
   } catch (error) {
     console.error('Database query error:', error);
@@ -56,7 +59,7 @@ export async function query<T extends RowDataPacket>(
  */
 export async function queryOne<T extends RowDataPacket>(
   sql: string,
-  params?: (string | number | boolean | Date | null | undefined)[]
+  params?: (string | number | boolean | Date | null)[]
 ): Promise<T | null> {
   const results = await query<T>(sql, params);
   return results.length > 0 ? results[0] : null;
@@ -70,10 +73,13 @@ export async function queryOne<T extends RowDataPacket>(
  */
 export async function execute(
   sql: string,
-  params?: (string | number | boolean | Date | null | undefined)[]
+  params?: (string | number | boolean | Date | null)[]
 ): Promise<ResultSetHeader> {
   try {
-    const [result] = await pool.execute<ResultSetHeader>(sql, params);
+    // Filter out undefined values and log for debugging
+    const cleanParams = params?.filter(p => p !== undefined);
+    console.log('[DEBUG] Execute params:', cleanParams);
+    const [result] = await pool.execute<ResultSetHeader>(sql, cleanParams);
     return result;
   } catch (error) {
     console.error('Database execute error:', error);

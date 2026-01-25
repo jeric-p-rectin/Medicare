@@ -5,11 +5,25 @@
       "Bash(npm run dev:*)",
       "Bash(timeout:*)",
       "Bash(curl:*)",
-      "mcp__next-devtools__browser_eval"
+      "mcp__next-devtools__browser_eval",
+      "Bash(cd:*)",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(if exist .next rmdir /s /q .next)",
+      "mcp__mysql__mysql_query",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill //F //PID 1132)"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "next-devtools",
-    "shadcn"
-  ]
+    "shadcn",
+    "mysql"
+  ],
+  "outputStyle": "default"
 }

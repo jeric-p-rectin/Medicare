@@ -18,12 +18,7 @@ export async function middleware(request: NextRequest) {
                        pathname.includes('.');
 
   // Allow static files
-  if (isStaticFile) {
-    return NextResponse.next();
-  }
-
-  // Allow API auth routes
-  if (isAuthRoute) {
+  if (isStaticFile || isAuthRoute) {
     return NextResponse.next();
   }
 
@@ -34,12 +29,17 @@ export async function middleware(request: NextRequest) {
   });
 
   const isLoggedIn = !!token;
+  const userRole = token?.role as string | undefined;
 
-  // Allow public routes
+  // Public routes handling
   if (isPublicRoute) {
-    // If logged in and trying to access login page, redirect to dashboard
+    // If logged in and trying to access login page, redirect based on role
     if (isLoggedIn && pathname === '/login') {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      if (userRole === 'PATIENT') {
+        return NextResponse.redirect(new URL('/patient-portal', request.url));
+      } else {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
     }
     return NextResponse.next();
   }
@@ -51,17 +51,64 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Role-based route protection
+
+  // Patient-only routes
+  if (pathname.startsWith('/patient-portal')) {
+    // Development logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[MIDDLEWARE] Patient Portal Access Attempt:', {
+        pathname,
+        isLoggedIn,
+        userRole,
+        userId: token?.id,
+        userName: token?.name,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    if (userRole !== 'PATIENT') {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('[MIDDLEWARE] Access Denied - Wrong Role:', {
+          requiredRole: 'PATIENT',
+          actualRole: userRole,
+          redirectTo: '/dashboard'
+        });
+      }
+
+      const dashboardUrl = new URL('/dashboard', request.url);
+      dashboardUrl.searchParams.set('error', 'patient_only');
+      return NextResponse.redirect(dashboardUrl);
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[MIDDLEWARE] Patient Portal Access Granted');
+    }
+
+    return NextResponse.next();
+  }
+
+  // Admin-only routes (block patients)
+  const adminOnlyRoutes = ['/patients', '/registration', '/statistics', '/alerts'];
+  const isAdminRoute = adminOnlyRoutes.some(route => pathname.startsWith(route));
+
+  if (isAdminRoute && userRole === 'PATIENT') {
+    return NextResponse.redirect(new URL('/patient-portal', request.url));
+  }
+
+  // Dashboard route - redirect patients to patient portal
+  if (pathname.startsWith('/dashboard') && userRole === 'PATIENT') {
+    return NextResponse.redirect(new URL('/patient-portal', request.url));
+  }
+
+  // Account route - allow all authenticated users
+  // (already protected by authentication check above)
+
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
     '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };

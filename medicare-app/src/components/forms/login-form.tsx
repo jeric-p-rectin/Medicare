@@ -48,13 +48,25 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        setError('Invalid username or password');
+        // Map specific error codes to user-friendly messages
+        if (result.error === 'ACCOUNT_DISABLED') {
+          setError('Your account has been disabled. Please contact the administrator.');
+        } else {
+          setError('Invalid username or password');
+        }
         setIsLoading(false);
         return;
       }
 
-      // Redirect to dashboard on success
-      router.push('/dashboard');
+      // Success - fetch session to determine role-based redirect
+      const sessionResponse = await fetch('/api/auth/session');
+      const session = await sessionResponse.json();
+
+      if (session?.user?.role === 'PATIENT') {
+        router.push('/patient-portal');
+      } else {
+        router.push('/dashboard');
+      }
       router.refresh();
     } catch {
       setError('An unexpected error occurred. Please try again.');

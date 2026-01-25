@@ -6,35 +6,35 @@ import { cn } from '@/lib/utils';
 
 const features = [
   {
-    icon: FileText,
-    title: 'Medical Records',
-    description: 'Digital EMR system for complete patient history',
-  },
-  {
-    icon: Bell,
-    title: 'Smart Alerts',
-    description: 'Real-time notifications for low stock & expiry',
-  },
-  {
-    icon: BarChart3,
-    title: 'Disease Tracking',
-    description: 'Monitor health trends across communities',
-  },
-  {
-    icon: ClipboardList,
-    title: 'Prescriptions',
-    description: 'Efficient medication management system',
-  },
-  {
-    icon: Calendar,
-    title: 'Appointments',
-    description: 'Streamlined scheduling and reminders',
-  },
-  {
     icon: LineChart,
     title: 'Analytics',
     description: 'Data-driven health insights',
   },
+  // {
+  //   icon: FileText,
+  //   title: 'Medical Records',
+  //   description: 'Digital EMR system for complete patient history',
+  // },
+  {
+    icon: Bell,
+    title: 'Smart Alerts',
+    description: 'Real-time notifications for Disease Outbreaks',
+  },
+  {
+    icon: BarChart3,
+    title: 'Disease Tracking',
+    description: 'Monitor health trends across the School',
+  },
+  // {
+  //   icon: ClipboardList,
+  //   title: 'Prescriptions',
+  //   description: 'Efficient medication management system',
+  // },
+  // {
+  //   icon: Calendar,
+  //   title: 'Appointments',
+  //   description: 'Streamlined scheduling and reminders',
+  // },
 ];
 
 export function Features() {

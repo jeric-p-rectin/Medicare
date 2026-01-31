@@ -18,7 +18,14 @@ export async function GET(request: Request) {
     const unread = searchParams.get('unread') === 'true';
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    const alerts = await getAlerts({ unread, limit });
+    let alerts = await getAlerts({ unread, limit });
+
+    // ROLE-BASED FILTERING FOR SYSTEM ALERTS
+    // SUPER_ADMIN sees all alerts including SYSTEM alerts (approval notifications)
+    // ADMIN/PATIENT should NOT see SYSTEM alerts (they're not meant for them)
+    if (session.user.role !== 'SUPER_ADMIN') {
+      alerts = alerts.filter(alert => alert.alertType !== 'SYSTEM');
+    }
 
     return NextResponse.json(alerts);
   } catch (error) {

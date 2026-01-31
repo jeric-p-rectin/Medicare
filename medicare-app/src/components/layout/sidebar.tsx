@@ -20,7 +20,7 @@ import { useState } from 'react';
 type NavItem = {
   href: string;
   label: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   roles: string[];
 };
 
@@ -32,21 +32,15 @@ const allNavItems: NavItem[] = [
   { href: '/account', label: 'Account', icon: Settings, roles: ['SUPER_ADMIN', 'ADMIN', 'PATIENT'] },
 ];
 
-export function Sidebar() {
-  const pathname = usePathname();
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const { data: session } = useSession();
+interface NavContentProps {
+  navItems: NavItem[];
+  pathname: string;
+  onMobileClose: () => void;
+  onLogout: () => void;
+}
 
-  // Filter navigation items based on user role
-  const navItems = allNavItems.filter(item =>
-    item.roles.includes(session?.user?.role || '')
-  );
-
-  const handleLogout = () => {
-    signOut({ callbackUrl: '/login' });
-  };
-
-  const NavContent = () => (
+function NavContent({ navItems, pathname, onMobileClose, onLogout }: NavContentProps) {
+  return (
     <>
       {/* Logo Section */}
       <div className="p-6 border-b border-gray-100">
@@ -77,7 +71,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setIsMobileOpen(false)}
+              onClick={onMobileClose}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200',
                 isActive
@@ -103,7 +97,7 @@ export function Sidebar() {
       {/* Logout Button */}
       <div className="p-4 border-t border-gray-100">
         <button
-          onClick={handleLogout}
+          onClick={onLogout}
           className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-600 hover:bg-red-50 transition-all duration-200 w-full"
         >
           <LogOut className="w-5 h-5" />
@@ -112,6 +106,21 @@ export function Sidebar() {
       </div>
     </>
   );
+}
+
+export function Sidebar() {
+  const pathname = usePathname();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { data: session } = useSession();
+
+  // Filter navigation items based on user role
+  const navItems = allNavItems.filter(item =>
+    item.roles.includes(session?.user?.role || '')
+  );
+
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/login' });
+  };
 
   return (
     <>
@@ -138,7 +147,12 @@ export function Sidebar() {
 
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex lg:flex-col w-64 bg-white border-r border-gray-100 h-screen sticky top-0 overflow-hidden">
-        <NavContent />
+        <NavContent
+          navItems={navItems}
+          pathname={pathname}
+          onMobileClose={() => setIsMobileOpen(false)}
+          onLogout={handleLogout}
+        />
       </aside>
 
       {/* Sidebar - Mobile */}
@@ -148,7 +162,12 @@ export function Sidebar() {
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <NavContent />
+        <NavContent
+          navItems={navItems}
+          pathname={pathname}
+          onMobileClose={() => setIsMobileOpen(false)}
+          onLogout={handleLogout}
+        />
       </aside>
     </>
   );

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { CredentialCard } from '@/components/registration/credential-card';
+import { SectionCombobox } from '@/components/registration/section-combobox';
 
 const registrationSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -25,7 +26,7 @@ const registrationSchema = z.object({
   email: z.string().email('Please enter a valid email address').optional().or(z.literal('')),
   dateOfBirth: z.string().min(1, 'Date of birth is required'),
   sex: z.enum(['MALE', 'FEMALE']),
-  gradeLevel: z.enum(['7', '8', '9', '10', '11', '12']),
+  gradeLevel: z.enum(['7', '8', '9', '10', '11', '12', 'Non-Graded']),
   section: z.string().min(1, 'Section is required'),
   lrn: z.string().length(12, 'LRN must be 12 digits'),
   parentGuardianName: z.string().min(1, 'Guardian name is required'),
@@ -58,11 +59,14 @@ export default function RegistrationPage() {
     formState: { errors },
     setValue,
     watch,
+    reset,
+    control,
   } = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
   });
 
   const dateOfBirth = watch('dateOfBirth');
+  const gradeLevel = watch('gradeLevel');
 
   // Calculate age from date of birth
   const calculateAge = (dob: string) => {
@@ -78,6 +82,13 @@ export default function RegistrationPage() {
   };
 
   const age = dateOfBirth ? calculateAge(dateOfBirth) : 0;
+
+  // Clear section when grade level changes
+  useEffect(() => {
+    if (gradeLevel) {
+      setValue('section', '');
+    }
+  }, [gradeLevel, setValue]);
 
   const onSubmit = async (data: RegistrationFormData) => {
     setIsSubmitting(true);
@@ -113,16 +124,25 @@ export default function RegistrationPage() {
         }),
       });
 
+      const result = await response.json();
+
       if (response.ok) {
-        // Display credentials instead of redirecting
-        setCredentials(tempCredentials);
-        setRegistrationSuccess(true);
-      } else {
-        const errorData = await response.json();
-        if (errorData.duplicates) {
-          setError(`Potential duplicate detected. Similar students found: ${errorData.duplicates.map((d: any) => d.name).join(', ')}`);
+        // Check if ADMIN (pending approval) or SUPER_ADMIN (direct creation)
+        if (result.status === 'pending_approval') {
+          // ADMIN: Registration pending approval
+          setError(''); // Clear any errors
+          alert(result.message || 'Registration request submitted for SUPER_ADMIN approval. You will be notified when it is approved.');
+          reset(); // Reset form
         } else {
-          setError(errorData.error || 'Failed to register student');
+          // SUPER_ADMIN: Display credentials
+          setCredentials(tempCredentials);
+          setRegistrationSuccess(true);
+        }
+      } else {
+        if (result.duplicates) {
+          setError(`Potential duplicate detected. Similar students found: ${result.duplicates.map((d: any) => d.name).join(', ')}`);
+        } else {
+          setError(result.error || 'Failed to register student');
         }
       }
     } catch (err) {
@@ -291,20 +311,32 @@ export default function RegistrationPage() {
                     <Label htmlFor="gradeLevel" className="block text-sm font-semibold text-gray-700 mb-2">
                       Grade Level <span className="text-red-500">*</span>
                     </Label>
-                    <select
-                      {...register('gradeLevel')}
-                      className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl
-                               focus:border-[#C41E3A] focus:bg-white focus:ring-4 focus:ring-red-50
-                               transition-all outline-none"
-                    >
-                      <option value="">Select Grade</option>
-                      <option value="7">Grade 7</option>
-                      <option value="8">Grade 8</option>
-                      <option value="9">Grade 9</option>
-                      <option value="10">Grade 10</option>
-                      <option value="11">Grade 11</option>
-                      <option value="12">Grade 12</option>
-                    </select>
+                    <Controller
+                      name="gradeLevel"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setValue('section', ''); // Clear section when grade changes
+                          }}
+                        >
+                          <SelectTrigger className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl focus:border-[#C41E3A] focus:bg-white focus:ring-4 focus:ring-red-50 transition-all outline-none">
+                            <SelectValue placeholder="Select Grade" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Non-Graded">Special Education (Non-Graded)</SelectItem>
+                            <SelectItem value="7">Grade 7</SelectItem>
+                            <SelectItem value="8">Grade 8</SelectItem>
+                            <SelectItem value="9">Grade 9</SelectItem>
+                            <SelectItem value="10">Grade 10</SelectItem>
+                            <SelectItem value="11">Grade 11</SelectItem>
+                            <SelectItem value="12">Grade 12</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                     {errors.gradeLevel && (
                       <p className="text-red-500 text-sm mt-1">{errors.gradeLevel.message}</p>
                     )}
@@ -314,13 +346,17 @@ export default function RegistrationPage() {
                     <Label htmlFor="section" className="block text-sm font-semibold text-gray-700 mb-2">
                       Section <span className="text-red-500">*</span>
                     </Label>
-                    <Input
-                      id="section"
-                      {...register('section')}
-                      placeholder="e.g., A, B, C, D"
-                      className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl
-                               focus:border-[#C41E3A] focus:bg-white focus:ring-4 focus:ring-red-50
-                               transition-all outline-none"
+                    <Controller
+                      name="section"
+                      control={control}
+                      render={({ field }) => (
+                        <SectionCombobox
+                          gradeLevel={gradeLevel}
+                          value={field.value || ''}
+                          onValueChange={field.onChange}
+                          disabled={!gradeLevel}
+                        />
+                      )}
                     />
                     {errors.section && (
                       <p className="text-red-500 text-sm mt-1">{errors.section.message}</p>

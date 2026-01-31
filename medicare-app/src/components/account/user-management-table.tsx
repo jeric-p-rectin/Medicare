@@ -66,14 +66,53 @@ export function UserManagementTable() {
         body: JSON.stringify({ isActive: !currentStatus }),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to update user status');
+        throw new Error(result.error || 'Failed to update user status');
       }
 
-      toast.success(`User ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
+      // Check if ADMIN (pending approval) or SUPER_ADMIN (direct action)
+      if (result.status === 'pending_approval') {
+        toast.info(result.message || 'Request submitted for approval');
+      } else {
+        toast.success(`User ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
+      }
+
       fetchUsers();
     } catch (error: any) {
       toast.error(error.message || 'Failed to update user status');
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: 'Requested deletion' }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete user');
+      }
+
+      // Check if ADMIN (pending approval) or SUPER_ADMIN (direct action)
+      if (result.status === 'pending_approval') {
+        toast.info(result.message || 'Deletion request submitted for approval');
+      } else {
+        toast.success('User deleted successfully');
+      }
+
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete user');
     }
   };
 
@@ -217,14 +256,24 @@ export function UserManagementTable() {
                         : 'Never'}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        onClick={() => handleToggleStatus(user.id, user.is_active)}
-                        variant="outline"
-                        size="sm"
-                        className="text-xs"
-                      >
-                        {user.is_active ? 'Deactivate' : 'Activate'}
-                      </Button>
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          onClick={() => handleToggleStatus(user.id, user.is_active)}
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                        >
+                          {user.is_active ? 'Deactivate' : 'Activate'}
+                        </Button>
+                        <Button
+                          onClick={() => handleDeleteUser(user.id, `${user.first_name} ${user.last_name}`)}
+                          variant="outline"
+                          size="sm"
+                          className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

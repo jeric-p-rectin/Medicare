@@ -14,7 +14,7 @@ export function AlertPopover() {
   const router = useRouter();
   const { alerts, unreadCount, markAsRead, isLoading } = useAlerts({
     unreadOnly: true,
-    refreshInterval: 30000, // Poll every 30 seconds
+    refreshInterval: 5000, // Poll every 5 seconds for faster notifications
   });
 
   // Get only the 5 most recent unread alerts

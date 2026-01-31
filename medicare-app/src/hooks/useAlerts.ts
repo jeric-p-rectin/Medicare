@@ -15,7 +15,7 @@ interface UseAlertsOptions {
 export function useAlerts(options: UseAlertsOptions = {}) {
   const {
     unreadOnly = false,
-    refreshInterval = 30000 // Poll every 30 seconds
+    refreshInterval = 5000 // Poll every 5 seconds for faster notifications
   } = options;
 
   const url = `/api/alerts${unreadOnly ? '?unread=true' : ''}`;

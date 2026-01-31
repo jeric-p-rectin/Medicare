@@ -35,7 +35,7 @@ if (process.env.NODE_ENV === 'development') {
  * @param params - Array of parameter values
  * @returns Array of results
  */
-export async function query<T extends RowDataPacket>(
+export async function query<T = any>(
   sql: string,
   params?: (string | number | boolean | Date | null)[]
 ): Promise<T[]> {
@@ -43,8 +43,8 @@ export async function query<T extends RowDataPacket>(
     // Filter out undefined values and log for debugging
     const cleanParams = params?.filter(p => p !== undefined);
     console.log('[DEBUG] Query params:', cleanParams);
-    const [results] = await pool.execute<T[]>(sql, cleanParams);
-    return results;
+    const [results] = await pool.execute<RowDataPacket[]>(sql, cleanParams);
+    return results as T[];
   } catch (error) {
     console.error('Database query error:', error);
     throw error;
@@ -57,7 +57,7 @@ export async function query<T extends RowDataPacket>(
  * @param params - Array of parameter values
  * @returns Single result or null
  */
-export async function queryOne<T extends RowDataPacket>(
+export async function queryOne<T = any>(
   sql: string,
   params?: (string | number | boolean | Date | null)[]
 ): Promise<T | null> {

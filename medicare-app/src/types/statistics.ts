@@ -5,6 +5,7 @@ export type TimePeriod = 'week' | 'month' | 'quarter' | 'year';
 export interface DiseaseStats {
   name: string;
   value: number;
+  [key: string]: string | number;
 }
 
 export interface TrendData {

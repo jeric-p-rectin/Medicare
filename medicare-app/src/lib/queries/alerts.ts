@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { query, queryOne, execute } from '../db';
 import type { Alert, AlertCreateInput } from '@/types/alert';
 
@@ -95,17 +96,20 @@ export async function markAlertAsRead(id: string): Promise<void> {
  * Create a new alert
  */
 export async function createAlert(data: AlertCreateInput): Promise<string> {
+  const alertId = randomUUID();
+
   const sql = `
     INSERT INTO alerts (
       id, alert_type, title, message, severity,
       related_disease, related_record_id, related_student_id
     ) VALUES (
-      UUID(), ?, ?, ?, ?,
+      ?, ?, ?, ?, ?,
       ?, ?, ?
     )
   `;
 
   await execute(sql, [
+    alertId,
     data.alertType,
     data.title,
     data.message,
@@ -115,12 +119,7 @@ export async function createAlert(data: AlertCreateInput): Promise<string> {
     data.relatedStudentId || null
   ]);
 
-  // Get the created alert ID
-  const result = await queryOne<{ id: string }>(
-    'SELECT id FROM alerts ORDER BY created_at DESC LIMIT 1'
-  );
-
-  return result?.id || '';
+  return alertId;
 }
 
 /**

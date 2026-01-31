@@ -95,7 +95,7 @@ export default function AccountPage() {
   const tabs = [
     { value: 'profile', label: 'Profile', show: true },
     { value: 'password', label: 'Password', show: true },
-    { value: 'users', label: 'User Management', show: user.role === 'SUPER_ADMIN' },
+    { value: 'users', label: 'User Management', show: user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' },
     { value: 'medical', label: 'Medical Records', show: user.role === 'PATIENT' },
   ];
 
@@ -137,8 +137,8 @@ export default function AccountPage() {
             <PasswordForm userId={user.id} />
           </TabsContent>
 
-          {/* User Management Tab (SUPER_ADMIN only) */}
-          {user.role === 'SUPER_ADMIN' && (
+          {/* User Management Tab (SUPER_ADMIN and ADMIN) */}
+          {(user.role === 'SUPER_ADMIN' || user.role === 'ADMIN') && (
             <TabsContent value="users" className="space-y-6">
               <UserManagementTable />
             </TabsContent>

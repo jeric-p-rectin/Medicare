@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { query } from '@/lib/db';
+import type { RowDataPacket } from 'mysql2';
 
 /**
  * GET /api/disease-categories
@@ -15,7 +16,7 @@ export async function GET() {
     }
 
     // Fetch distinct disease categories
-    const categoriesResult = await query<{ disease_category: string }>(
+    const categoriesResult = await query<{ disease_category: string } & RowDataPacket>(
       `SELECT DISTINCT disease_category
        FROM medical_records
        WHERE disease_category IS NOT NULL
@@ -23,7 +24,7 @@ export async function GET() {
     );
 
     // Fetch distinct illness types
-    const typesResult = await query<{ illness_type: string }>(
+    const typesResult = await query<{ illness_type: string } & RowDataPacket>(
       `SELECT DISTINCT illness_type
        FROM medical_records
        WHERE illness_type IS NOT NULL

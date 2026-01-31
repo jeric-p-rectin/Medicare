@@ -153,3 +153,12 @@ export async function emailExists(email: string): Promise<boolean> {
   const result = await queryOne<RowDataPacket>(sql, [email]);
   return result !== null;
 }
+
+/**
+ * Delete a user (hard delete - permanently removes user from database)
+ * Student records will be cascaded due to foreign key constraints
+ */
+export async function deleteUser(userId: string): Promise<void> {
+  const sql = 'DELETE FROM users WHERE id = ?';
+  await execute(sql, [userId]);
+}

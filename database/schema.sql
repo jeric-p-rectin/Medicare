@@ -5,6 +5,7 @@
 
 -- Drop existing tables if they exist
 DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS pending_actions;
 DROP TABLE IF EXISTS duplicate_detections;
 DROP TABLE IF EXISTS alerts;
 DROP TABLE IF EXISTS medical_records;
@@ -157,6 +158,50 @@ CREATE TABLE alerts (
   INDEX idx_unread (is_read, created_at),
   INDEX idx_unresolved (is_resolved, severity, created_at),
   INDEX idx_disease (related_disease)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Pending Actions Table (Approval Workflow System)
+-- =====================================================
+CREATE TABLE pending_actions (
+  id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+
+  -- Action Details
+  action_type ENUM('REGISTER_STUDENT', 'DEACTIVATE_USER', 'DELETE_USER') NOT NULL,
+
+  -- Requester Information
+  requested_by_id VARCHAR(36) NOT NULL,
+  requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  -- Target Information (for user deactivation/deletion)
+  target_user_id VARCHAR(36),
+
+  -- Approval Status
+  status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
+  reviewed_by_id VARCHAR(36),
+  reviewed_at TIMESTAMP NULL,
+  review_notes TEXT,
+
+  -- Action-specific Data (JSON for flexibility across different action types)
+  action_data JSON NOT NULL COMMENT 'Stores registration form data, user details, etc.',
+
+  -- Priority
+  priority ENUM('LOW', 'MEDIUM', 'HIGH') DEFAULT 'MEDIUM',
+
+  -- Timestamps
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  -- Foreign Keys
+  FOREIGN KEY (requested_by_id) REFERENCES users(id),
+  FOREIGN KEY (reviewed_by_id) REFERENCES users(id),
+  FOREIGN KEY (target_user_id) REFERENCES users(id) ON DELETE SET NULL,
+
+  -- Indexes for query performance
+  INDEX idx_status (status, created_at),
+  INDEX idx_requester (requested_by_id),
+  INDEX idx_action_type (action_type, status),
+  INDEX idx_pending (status, priority, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================

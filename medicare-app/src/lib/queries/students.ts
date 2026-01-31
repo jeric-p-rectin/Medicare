@@ -145,6 +145,28 @@ export async function findStudentById(id: string): Promise<Student | null> {
 }
 
 /**
+ * Convert various date formats to MySQL DATE format (YYYY-MM-DD)
+ * Handles: ISO strings, Date objects, and MySQL DATE strings
+ */
+function toMySQLDate(date: Date | string): string {
+  if (typeof date === 'string') {
+    // If already in YYYY-MM-DD format, return as-is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return date;
+    }
+    // Parse ISO datetime string or other formats
+    date = new Date(date);
+  }
+
+  // Convert Date object to YYYY-MM-DD
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+/**
  * Create a new student (creates user account + student record in transaction)
  */
 export async function createStudent(data: StudentCreateInput): Promise<string> {
@@ -188,7 +210,7 @@ export async function createStudent(data: StudentCreateInput): Promise<string> {
       userId,
       data.lrn,
       data.studentNumber,
-      data.dateOfBirth,
+      toMySQLDate(data.dateOfBirth),
       data.age,
       data.sex,
       data.gradeLevel,

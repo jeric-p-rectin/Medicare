@@ -144,7 +144,7 @@ medicare-app/
 - `sections.ts` - Academic sections
 - `users.ts` - User authentication
 
-**Database Schema:** 8 core tables:
+**Database Schema:** 9 core tables:
 - `users` - System users with role-based access (SUPER_ADMIN, ADMIN, PATIENT)
 - `students` - Patient records linked to users (one-to-one)
 - `sections` - Academic sections (Grades 7-12, Sections A-D)
@@ -152,6 +152,7 @@ medicare-app/
 - `alerts` - System notifications (outbreak alerts, duplicate detection)
 - `duplicate_detections` - Potential duplicate student records
 - `audit_logs` - Compliance tracking for all CRUD operations
+- `pending_actions` - Approval workflow for ADMIN requests
 
 ### Authentication & Authorization
 
@@ -211,6 +212,35 @@ medicare-app/
 - Student Number: `<year>-<random6digits>`
 - Password: Randomly generated 12-character string
 
+#### 5. Permission & Approval System (`src/lib/pending-action-executor.ts`)
+**Workflow:**
+- **ADMIN Role:** Must request SUPER_ADMIN approval for:
+  - Student registrations (POST /api/students)
+  - User deactivation (PATCH /api/users/[id])
+  - User deletion (DELETE /api/users/[id])
+- **SUPER_ADMIN Role:** Can perform all actions directly without approval
+
+**Pending Actions Table:**
+- Stores action type, requester details, target user, status (PENDING/APPROVED/REJECTED)
+- Action-specific data stored as JSON for flexibility
+- Priority levels: LOW, MEDIUM, HIGH
+
+**Approval Flow:**
+1. ADMIN submits request → Creates pending action
+2. SUPER_ADMIN reviews in "Pending Approvals" tab
+3. Approve: Executes action + notifies ADMIN with credentials (for registrations)
+4. Reject: Marks as rejected + notifies ADMIN with reason
+
+**Notification System:**
+- Automatic SYSTEM alerts created for approval/rejection
+- For approved registrations: ADMIN receives credentials via alert
+- For rejections: ADMIN receives rejection reason
+
+**User Management:**
+- ADMIN now has access to User Management page
+- Delete functionality implemented (hard delete with cascade)
+- All destructive actions require SUPER_ADMIN approval
+
 ### API Routes
 
 All API routes in `src/app/api/`:
@@ -236,6 +266,22 @@ All API routes in `src/app/api/`:
 **Statistics:**
 - `GET /api/statistics` - Disease statistics with time filtering
 
+**Pending Actions:**
+- `GET /api/pending-actions` - List pending actions (SUPER_ADMIN: all, ADMIN: own only)
+- `POST /api/pending-actions` - Create pending action (ADMIN, SUPER_ADMIN)
+- `GET /api/pending-actions/[id]` - Get pending action details
+- `DELETE /api/pending-actions/[id]` - Cancel pending action
+- `PATCH /api/pending-actions/[id]/approve` - Approve action (SUPER_ADMIN only)
+- `PATCH /api/pending-actions/[id]/reject` - Reject action (SUPER_ADMIN only)
+
+**Users:**
+- `GET /api/users` - List all users (SUPER_ADMIN only)
+- `POST /api/users` - Create user (SUPER_ADMIN only)
+- `GET /api/users/[id]` - Get user details
+- `PUT /api/users/[id]` - Update user profile
+- `PATCH /api/users/[id]` - Update user status (deactivate/activate)
+- `DELETE /api/users/[id]` - Delete user (hard delete with pending approval for ADMIN)
+
 **Auth:**
 - `/api/auth/[...nextauth]` - NextAuth endpoints
 
@@ -245,6 +291,7 @@ All API routes in `src/app/api/`:
 
 **Hooks:**
 - `useAlerts()` - Alert fetching with SWR, returns: `{ alerts, error, isLoading, unreadCount, markAsRead(), dismissAlert() }`
+- `usePendingActions()` - Pending actions with SWR, returns: `{ pendingActions, pendingCount, isLoading, approvePendingAction(), rejectPendingAction(), cancelPendingAction() }`
 
 **Layout Components:**
 - `navbar.tsx` - Landing page navigation
@@ -360,6 +407,8 @@ const { data, error, mutate } = useSWR(
 - `src/lib/auth.ts` - NextAuth config
 - `src/lib/alert-system.ts` - Outbreak detection
 - `src/lib/duplicate-detection.ts` - Duplicate matching
+- `src/lib/pending-action-executor.ts` - Approval workflow execution
+- `src/lib/queries/pending-actions.ts` - Pending action database operations
 - `src/middleware.ts` - Route protection
 
 **Main Pages:**

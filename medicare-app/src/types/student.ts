@@ -1,6 +1,6 @@
 // Student/Patient type definitions
 
-export type GradeLevel = '7' | '8' | '9' | '10' | '11' | '12';
+export type GradeLevel = '7' | '8' | '9' | '10' | '11' | '12' | 'Non-Graded';
 export type Sex = 'MALE' | 'FEMALE';
 
 export interface Student {

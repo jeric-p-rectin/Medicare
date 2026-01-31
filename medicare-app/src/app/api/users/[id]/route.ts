@@ -91,7 +91,7 @@ export async function PUT(
       await updateUser(userId, {
         firstName: validatedData.firstName,
         lastName: validatedData.lastName,
-        middleName: validatedData.middleName || null,
+        middleName: validatedData.middleName || undefined,
         email: validatedData.email || undefined,
       });
     }
@@ -113,7 +113,7 @@ export async function PUT(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: error.issues },
         { status: 400 }
       );
     }
@@ -129,7 +129,7 @@ export async function PUT(
 /**
  * PATCH /api/users/[id]
  * Update user active status (deactivate/activate)
- * Authorization: Only SUPER_ADMIN can change user status
+ * Authorization: SUPER_ADMIN can change status directly, ADMIN creates pending action
  */
 export async function PATCH(
   request: NextRequest,
@@ -142,8 +142,8 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only SUPER_ADMIN can change user status
-    if (session.user.role !== 'SUPER_ADMIN') {
+    // Only SUPER_ADMIN and ADMIN can change user status
+    if (session.user.role !== 'SUPER_ADMIN' && session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -153,7 +153,7 @@ export async function PATCH(
     // Validate request body
     const validatedData = userStatusUpdateSchema.parse(body);
 
-    // Prevent SUPER_ADMIN from deactivating themselves
+    // Prevent users from deactivating themselves
     if (userId === session.user.id && !validatedData.isActive) {
       return NextResponse.json(
         { error: 'You cannot deactivate your own account' },
@@ -161,6 +161,41 @@ export async function PATCH(
       );
     }
 
+    // Get user details for pending action data
+    const targetUser = await findUserById(userId);
+    if (!targetUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // ROLE-BASED BRANCHING: ADMIN creates pending action, SUPER_ADMIN updates directly
+    if (session.user.role === 'ADMIN') {
+      // ADMIN: Create pending action for SUPER_ADMIN approval
+      const { createPendingAction } = await import('@/lib/queries/pending-actions');
+
+      const pendingActionId = await createPendingAction({
+        actionType: 'DEACTIVATE_USER',
+        requestedById: session.user.id!,
+        targetUserId: userId,
+        actionData: {
+          userId,
+          username: targetUser.username,
+          fullName: `${targetUser.first_name} ${targetUser.last_name}`,
+          email: targetUser.email || undefined,
+          role: targetUser.role,
+          reason: body.reason || undefined,
+          isActive: targetUser.is_active,
+        },
+        priority: 'HIGH',
+      });
+
+      return NextResponse.json({
+        status: 'pending_approval',
+        pendingActionId,
+        message: 'User deactivation request submitted for SUPER_ADMIN approval.',
+      });
+    }
+
+    // SUPER_ADMIN: Continue with existing direct update logic
     // Update user status
     await updateUserStatus(userId, validatedData.isActive);
 
@@ -181,7 +216,7 @@ export async function PATCH(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: error.issues },
         { status: 400 }
       );
     }
@@ -189,6 +224,87 @@ export async function PATCH(
     console.error('Error updating user status:', error);
     return NextResponse.json(
       { error: 'Failed to update user status' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/users/[id]
+ * Delete user (hard delete - permanently removes from database)
+ * Authorization: SUPER_ADMIN can delete directly, ADMIN creates pending action
+ * WARNING: This is a destructive action that cannot be undone
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Only SUPER_ADMIN and ADMIN can delete users
+    if (session.user.role !== 'SUPER_ADMIN' && session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const { id: userId } = await params;
+
+    // Prevent users from deleting themselves
+    if (userId === session.user.id) {
+      return NextResponse.json(
+        { error: 'You cannot delete your own account' },
+        { status: 400 }
+      );
+    }
+
+    // Get user details for pending action data
+    const targetUser = await findUserById(userId);
+    if (!targetUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // ROLE-BASED BRANCHING: ADMIN creates pending action, SUPER_ADMIN deletes directly
+    if (session.user.role === 'ADMIN') {
+      // ADMIN: Create pending action for SUPER_ADMIN approval
+      const { createPendingAction } = await import('@/lib/queries/pending-actions');
+
+      const pendingActionId = await createPendingAction({
+        actionType: 'DELETE_USER',
+        requestedById: session.user.id!,
+        targetUserId: userId,
+        actionData: {
+          userId,
+          username: targetUser.username,
+          fullName: `${targetUser.first_name} ${targetUser.last_name}`,
+          email: targetUser.email || undefined,
+          role: targetUser.role,
+          reason: (await request.json()).reason || undefined,
+        },
+        priority: 'HIGH',
+      });
+
+      return NextResponse.json({
+        status: 'pending_approval',
+        pendingActionId,
+        message: 'User deletion request submitted for SUPER_ADMIN approval.',
+      });
+    }
+
+    // SUPER_ADMIN: Delete user directly
+    const { deleteUser } = await import('@/lib/queries/users');
+    await deleteUser(userId);
+
+    return NextResponse.json({
+      message: 'User deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete user' },
       { status: 500 }
     );
   }

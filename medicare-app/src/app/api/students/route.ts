@@ -107,7 +107,59 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
-    // Hash password
+    // ROLE-BASED BRANCHING: ADMIN creates pending action, SUPER_ADMIN creates directly
+    if (session.user.role === 'ADMIN') {
+      // ADMIN: Create pending action for SUPER_ADMIN approval
+      // Password will be hashed AFTER approval in pending-action-executor
+      const { createPendingAction } = await import('@/lib/queries/pending-actions');
+
+      const pendingActionId = await createPendingAction({
+        actionType: 'REGISTER_STUDENT',
+        requestedById: session.user.id!,
+        actionData: {
+          username: data.username,
+          password: data.password,  // Store plain text password (will be hashed after approval)
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          middleName: data.middleName,
+          dateOfBirth: new Date(data.dateOfBirth),
+          age: data.age,
+          sex: data.sex,
+          gradeLevel: data.gradeLevel,
+          section: data.section,
+          lrn: data.lrn,
+          studentNumber: data.studentNumber,
+          parentGuardianName: data.parentGuardianName,
+          parentGuardianContact: data.parentGuardianContact,
+          address: data.address,
+          bmi: data.bmi,
+          healthHistory: data.healthHistory,
+          createdById: session.user.id!,
+        },
+        priority: 'MEDIUM',
+      });
+
+      // Log the pending action creation
+      await logAction(
+        session.user.id!,
+        'CREATE',
+        'pending_action',
+        pendingActionId,
+        null,
+        { action_type: 'REGISTER_STUDENT' },
+        request
+      );
+
+      return NextResponse.json({
+        status: 'pending_approval',
+        pendingActionId,
+        message: 'Registration request submitted for SUPER_ADMIN approval. You will be notified when it is approved.',
+      });
+    }
+
+    // SUPER_ADMIN: Continue with existing direct creation logic
+    // Hash password for SUPER_ADMIN direct creation
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     // Create student (wrapped in try-catch to handle LRN unique constraint)

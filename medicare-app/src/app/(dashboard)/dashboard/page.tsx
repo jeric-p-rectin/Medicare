@@ -48,6 +48,12 @@ export default function SchoolWideDashboard() {
     return gradeData?.totalStudents || 0;
   };
 
+  const getSpecialEdCount = () => {
+    if (!stats) return 0;
+    const specialEdData = stats.gradeStats.find((g) => g.grade === 'Non-Graded');
+    return specialEdData?.totalStudents || 0;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
@@ -90,9 +96,35 @@ export default function SchoolWideDashboard() {
         </div>
       </div>
 
+      {/* Special Education Card */}
+      <div className="mb-8">
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Special Education</h3>
+        <div
+          className="bg-white rounded-2xl shadow-lg shadow-red-500/5 p-6
+                   cursor-pointer hover:shadow-xl hover:-translate-y-2
+                   transition-all duration-300 max-w-xs"
+          onClick={() => router.push('/dashboard/grade/Non-Graded')}
+        >
+          <div className="text-center">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full
+                        bg-gradient-to-r from-[#C41E3A] to-[#E63946]
+                        flex items-center justify-center shadow-lg shadow-red-500/30">
+              <span className="text-2xl font-bold text-white">SPED</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-800 mb-1">
+              {getSpecialEdCount()}
+            </div>
+            <div className="text-sm text-gray-500">Students</div>
+          </div>
+        </div>
+        <p className="text-gray-500 mt-4 text-sm">
+          Click to view Special Education sections
+        </p>
+      </div>
+
       {/* Grade Level Cards */}
       <div>
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">Grade Levels</h3>
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Grade Levels (Junior & Senior High)</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {['7', '8', '9', '10', '11', '12'].map((grade) => (
             <div

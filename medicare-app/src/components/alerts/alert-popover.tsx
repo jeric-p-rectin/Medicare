@@ -97,9 +97,11 @@ export function AlertPopover() {
                       <p className="text-xs text-gray-600 line-clamp-2 mb-2">
                         {alert.message}
                       </p>
-                      <p className="text-xs text-gray-500">
-                        {formatDistanceToNow(new Date(alert.createdAt), { addSuffix: true })}
-                      </p>
+                      {new Date(alert.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
                     </div>
                   </div>
                 </div>

@@ -77,35 +77,8 @@ export async function createPendingAction(data: PendingActionCreateInput): Promi
   const pendingAction = await queryOne<{ id: string }>(selectSql, [data.requestedById]);
   const pendingActionId = pendingAction!.id;
 
-  // Create notification alert for SUPER_ADMIN
-  try {
-    // Get requester details
-    const requesterSql = `
-      SELECT CONCAT(first_name, ' ', last_name) as fullName, email
-      FROM users
-      WHERE id = ?
-    `;
-    const requester = await queryOne<{ fullName: string; email: string }>(requesterSql, [data.requestedById]);
-    const requesterName = requester?.fullName || requester?.email || `User ${data.requestedById}`;
-
-    const alertId = await createAlert({
-      alertType: 'SYSTEM',
-      title: getNotificationTitle(data.actionType),
-      message: getNotificationMessage(data.actionType, requesterName, data.actionData),
-      severity: data.priority === 'HIGH' ? 'HIGH' : 'MEDIUM',
-    });
-
-    console.log(`[createPendingAction] Notification alert created (ID: ${alertId}) for pending action ${pendingActionId}`);
-  } catch (alertError) {
-    // Don't fail the entire request if alert creation fails
-    // The pending action is still created successfully
-    console.error('[createPendingAction] Failed to create notification alert:', alertError);
-    console.error('[createPendingAction] Alert details:', {
-      alertType: 'SYSTEM',
-      title: getNotificationTitle(data.actionType),
-      actionType: data.actionType,
-    });
-  }
+  // Note: Notification alert is created in the API route (/api/pending-actions/route.ts)
+  // to avoid duplicate alerts
 
   return pendingActionId;
 }

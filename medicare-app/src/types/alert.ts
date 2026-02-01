@@ -15,6 +15,9 @@ export interface Alert {
   relatedRecordId?: string;
   relatedStudentId?: string;
 
+  // Recipient (for user-specific notifications)
+  recipientUserId?: string;
+
   // Alert Status
   isRead: boolean;
   isResolved: boolean;
@@ -35,6 +38,7 @@ export interface AlertCreateInput {
   relatedDisease?: string;
   relatedRecordId?: string;
   relatedStudentId?: string;
+  recipientUserId?: string;
 }
 
 export interface DuplicateDetection {

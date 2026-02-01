@@ -2,9 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, UserPlus, Loader2 } from 'lucide-react';
+import { Search, UserPlus, Loader2, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useSections } from '@/hooks/useSections';
+import { SectionCombobox } from '@/components/registration/section-combobox';
 import {
   Table,
   TableBody,
@@ -27,9 +36,20 @@ export default function PatientsPage() {
   const grade = searchParams.get('grade') || '';
   const section = searchParams.get('section') || '';
 
+  const [gradeFilter, setGradeFilter] = useState<string>(grade);
+  const [sectionFilter, setSectionFilter] = useState<string>(section);
+
+  // Fetch sections dynamically based on selected grade
+  const { sections, isLoading: sectionsLoading } = useSections(gradeFilter);
+
   useEffect(() => {
     fetchPatients();
   }, [searchQuery, page, grade, section]);
+
+  useEffect(() => {
+    setGradeFilter(grade);
+    setSectionFilter(section);
+  }, [grade, section]);
 
   const fetchPatients = async () => {
     try {
@@ -56,6 +76,39 @@ export default function PatientsPage() {
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     setPage(1); // Reset to first page on search
+  };
+
+  const handleGradeChange = (value: string) => {
+    setGradeFilter(value);
+    setSectionFilter(''); // Reset section when grade changes
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set('grade', value);
+    } else {
+      params.delete('grade');
+    }
+    params.delete('section'); // Reset section
+    params.set('page', '1'); // Reset to first page
+    router.push(`/patients?${params.toString()}`);
+  };
+
+  const handleSectionChange = (value: string) => {
+    setSectionFilter(value);
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set('section', value);
+    } else {
+      params.delete('section');
+    }
+    params.set('page', '1');
+    router.push(`/patients?${params.toString()}`);
+  };
+
+  const handleClearFilters = () => {
+    setGradeFilter('');
+    setSectionFilter('');
+    setSearchQuery('');
+    router.push('/patients?page=1');
   };
 
   return (
@@ -93,6 +146,63 @@ export default function PatientsPage() {
                        transition-all outline-none shadow-sm"
             />
           </div>
+        </div>
+
+        {/* Filters */}
+        <div className="mb-6 flex gap-4 items-center flex-wrap">
+          {/* Grade Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">Grade:</span>
+            <Select value={gradeFilter || undefined} onValueChange={handleGradeChange}>
+              <SelectTrigger className="w-[180px] bg-white border-2 border-gray-100 rounded-xl
+                                       focus:border-[#C41E3A] transition-all">
+                <SelectValue placeholder="All Grades" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">Grade 7</SelectItem>
+                <SelectItem value="8">Grade 8</SelectItem>
+                <SelectItem value="9">Grade 9</SelectItem>
+                <SelectItem value="10">Grade 10</SelectItem>
+                <SelectItem value="11">Grade 11</SelectItem>
+                <SelectItem value="12">Grade 12</SelectItem>
+                <SelectItem value="Non-Graded">Non-Graded (SNED)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Section Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">Section:</span>
+            <div className="w-[250px]">
+              <SectionCombobox
+                gradeLevel={gradeFilter}
+                value={sectionFilter}
+                onValueChange={handleSectionChange}
+                disabled={!gradeFilter || sectionsLoading}
+              />
+            </div>
+          </div>
+
+          {/* Clear Filters Button */}
+          {(gradeFilter || sectionFilter || searchQuery) && (
+            <Button
+              variant="outline"
+              onClick={handleClearFilters}
+              className="px-4 py-2 border-2 border-gray-200 rounded-xl
+                       hover:border-[#C41E3A] hover:bg-[#FFF5F6]
+                       transition-all text-sm font-semibold flex items-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              Clear Filters
+            </Button>
+          )}
+
+          {/* Active Filters Count */}
+          {(gradeFilter || sectionFilter || searchQuery) && (
+            <span className="text-sm text-gray-500">
+              {[searchQuery, gradeFilter, sectionFilter].filter(Boolean).length} filter(s) active
+            </span>
+          )}
         </div>
 
         {/* Patient Table */}

@@ -225,9 +225,9 @@ CREATE TABLE duplicate_detections (
   detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   resolved_at TIMESTAMP NULL,
 
-  FOREIGN KEY (student_id_1) REFERENCES students(id),
-  FOREIGN KEY (student_id_2) REFERENCES students(id),
-  FOREIGN KEY (resolved_by_id) REFERENCES users(id),
+  FOREIGN KEY (student_id_1) REFERENCES students(id) ON DELETE CASCADE,
+  FOREIGN KEY (student_id_2) REFERENCES students(id) ON DELETE CASCADE,
+  FOREIGN KEY (resolved_by_id) REFERENCES users(id) ON DELETE SET NULL,
 
   INDEX idx_unresolved (is_resolved, detected_at),
   INDEX idx_student1 (student_id_1),

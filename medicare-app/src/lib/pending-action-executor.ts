@@ -85,7 +85,13 @@ async function executeRegistration(
 
   // Run duplicate detection (non-blocking)
   try {
-    await detectDuplicate(studentId);
+    await detectDuplicate(
+      studentId,
+      data.firstName,
+      data.lastName,
+      new Date(data.dateOfBirth),
+      data.lrn
+    );
   } catch (error) {
     console.error('[executeRegistration] Duplicate detection failed:', error);
     // Don't fail the registration if duplicate detection fails
@@ -209,6 +215,7 @@ export async function notifyRequester(
     title,
     message: alertMessage,
     severity,
+    recipientUserId: requesterId,  // Send notification to the requesting ADMIN
   });
 
   console.log(`[notifyRequester] Notification sent to requester ${requesterId}:`, title);

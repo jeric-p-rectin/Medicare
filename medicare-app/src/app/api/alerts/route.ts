@@ -20,12 +20,13 @@ export async function GET(request: Request) {
 
     let alerts = await getAlerts({ unread, limit });
 
-    // ROLE-BASED FILTERING FOR SYSTEM ALERTS
-    // SUPER_ADMIN sees all alerts including SYSTEM alerts (approval notifications)
-    // ADMIN/PATIENT should NOT see SYSTEM alerts (they're not meant for them)
-    if (session.user.role !== 'SUPER_ADMIN') {
-      alerts = alerts.filter(alert => alert.alertType !== 'SYSTEM');
-    }
+    // RECIPIENT-BASED FILTERING
+    // Show alerts that are either:
+    // 1. Global (recipientUserId is null) - visible to all users (e.g., outbreak alerts)
+    // 2. Specifically for this user (recipientUserId matches current user's ID)
+    alerts = alerts.filter(alert =>
+      !alert.recipientUserId || alert.recipientUserId === session.user.id
+    );
 
     return NextResponse.json(alerts);
   } catch (error) {

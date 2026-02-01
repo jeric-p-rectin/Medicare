@@ -16,6 +16,7 @@ export async function getUnreadAlerts(): Promise<Alert[]> {
       related_disease as relatedDisease,
       related_record_id as relatedRecordId,
       related_student_id as relatedStudentId,
+      recipient_user_id as recipientUserId,
       is_read as isRead,
       is_resolved as isResolved,
       resolved_by_id as resolvedById,
@@ -45,6 +46,7 @@ export async function getAlerts(options?: { unread?: boolean; limit?: number }):
       related_disease as relatedDisease,
       related_record_id as relatedRecordId,
       related_student_id as relatedStudentId,
+      recipient_user_id as recipientUserId,
       is_read as isRead,
       is_resolved as isResolved,
       resolved_by_id as resolvedById,
@@ -101,10 +103,10 @@ export async function createAlert(data: AlertCreateInput): Promise<string> {
   const sql = `
     INSERT INTO alerts (
       id, alert_type, title, message, severity,
-      related_disease, related_record_id, related_student_id
+      related_disease, related_record_id, related_student_id, recipient_user_id
     ) VALUES (
       ?, ?, ?, ?, ?,
-      ?, ?, ?
+      ?, ?, ?, ?
     )
   `;
 
@@ -116,7 +118,8 @@ export async function createAlert(data: AlertCreateInput): Promise<string> {
     data.severity,
     data.relatedDisease || null,
     data.relatedRecordId || null,
-    data.relatedStudentId || null
+    data.relatedStudentId || null,
+    data.recipientUserId || null
   ]);
 
   return alertId;

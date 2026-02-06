@@ -1,6 +1,15 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "mcp__mysql__mysql_query"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "next-devtools",
-    "shadcn"
+    "shadcn",
+    "mysql"
   ]
 }

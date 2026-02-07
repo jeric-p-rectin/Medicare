@@ -119,12 +119,12 @@ export async function POST(request: NextRequest) {
     // Create user
     const userId = await createUser({
       username: validatedData.username,
-      email: validatedData.email || null,
+      email: validatedData.email || undefined,
       password: hashedPassword,
       role: validatedData.role,
       firstName: validatedData.firstName,
       lastName: validatedData.lastName,
-      middleName: validatedData.middleName || null,
+      middleName: validatedData.middleName || undefined,
     });
 
     return NextResponse.json({

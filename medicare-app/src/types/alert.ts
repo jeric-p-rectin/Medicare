@@ -1,6 +1,6 @@
 // Alert type definitions
 
-export type AlertType = 'OUTBREAK_SUSPECTED' | 'DUPLICATE_DETECTED' | 'SYSTEM';
+export type AlertType = 'OUTBREAK_SUSPECTED' | 'DUPLICATE_DETECTED' | 'SYSTEM' | 'DISEASE_TREND';
 export type AlertSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 export interface Alert {

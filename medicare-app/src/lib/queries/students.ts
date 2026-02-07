@@ -1,5 +1,6 @@
 import { query, queryOne, transaction } from '../db';
 import type { Student, StudentCreateInput, StudentUpdateInput, StudentSearchOptions, StudentListResult } from '@/types/student';
+import { UserRow } from '@/types/api-response';
 
 /**
  * Find students with search, pagination, and filters
@@ -22,8 +23,8 @@ export async function findStudents(options: StudentSearchOptions): Promise<Stude
   console.log('[findStudents] Pagination:', { pageInt, limitInt, offset });
   console.log('[findStudents] Filters:', { search, grade, section });
 
-  let whereClauses: string[] = [];
-  let params: (string | number)[] = [];
+  const whereClauses: string[] = [];
+  const params: (string | number)[] = [];
 
   // Search filter
   if (search) {
@@ -187,11 +188,11 @@ export async function createStudent(data: StudentCreateInput): Promise<string> {
     ]);
 
     // Get the created user ID
-    const [userRows]: any = await connection.execute(
+    const [userRows] = await connection.execute<UserRow[]>(
       'SELECT id FROM users WHERE username = ? LIMIT 1',
       [data.username]
     );
-    const userId = userRows[0].id;
+    const userId = (userRows[0] as UserRow).id;
 
     // Create student record
     const studentSql = `
@@ -224,12 +225,12 @@ export async function createStudent(data: StudentCreateInput): Promise<string> {
     ]);
 
     // Get the created student ID
-    const [studentRows]: any = await connection.execute(
+    const [studentRows] = await connection.execute<UserRow[]>(
       'SELECT id FROM students WHERE user_id = ? LIMIT 1',
       [userId]
     );
 
-    return studentRows[0].id;
+    return (studentRows[0] as UserRow).id;
   });
 }
 
@@ -238,7 +239,7 @@ export async function createStudent(data: StudentCreateInput): Promise<string> {
  */
 export async function updateStudent(id: string, data: StudentUpdateInput): Promise<void> {
   const updates: string[] = [];
-  const params: any[] = [];
+  const params: (string | number | Date | null)[] = [];
 
   // Build dynamic UPDATE query based on provided fields
   if (data.firstName) {
@@ -340,7 +341,7 @@ export async function checkDuplicateStudent(
     WHERE (LOWER(u.first_name) = LOWER(?) AND LOWER(u.last_name) = LOWER(?) AND s.date_of_birth = ?)
   `;
 
-  const params: any[] = [firstName, lastName, dateOfBirth];
+  const params: (string | Date)[] = [firstName, lastName, dateOfBirth];
 
   // Also check for LRN match if provided
   if (lrn) {

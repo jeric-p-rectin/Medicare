@@ -1,4 +1,5 @@
 import { query } from './db';
+import { AuditLogWithUser } from '@/types/api-response';
 
 /**
  * Log an action to the audit log
@@ -9,8 +10,8 @@ export async function logAction(
   action: 'CREATE' | 'READ' | 'UPDATE' | 'DELETE',
   tableName: string,
   recordId: string | null = null,
-  oldValues: any = null,
-  newValues: any = null,
+  oldValues: unknown = null,
+  newValues: unknown = null,
   request?: Request
 ): Promise<void> {
   // Extract IP and user agent from request if provided
@@ -52,7 +53,7 @@ export async function logAction(
 /**
  * Get audit logs for a specific record
  */
-export async function getRecordAuditLogs(tableName: string, recordId: string): Promise<any[]> {
+export async function getRecordAuditLogs(tableName: string, recordId: string): Promise<AuditLogWithUser[]> {
   const sql = `
     SELECT
       al.id,
@@ -76,7 +77,7 @@ export async function getRecordAuditLogs(tableName: string, recordId: string): P
 /**
  * Get recent audit logs for a user
  */
-export async function getUserAuditLogs(userId: string, limit: number = 50): Promise<any[]> {
+export async function getUserAuditLogs(userId: string, limit: number = 50): Promise<AuditLogWithUser[]> {
   const sql = `
     SELECT
       al.id,

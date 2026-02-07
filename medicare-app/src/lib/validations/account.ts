@@ -44,9 +44,7 @@ export const userCreateSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50, 'First name must be 50 characters or less'),
   lastName: z.string().min(1, 'Last name is required').max(50, 'Last name must be 50 characters or less'),
   middleName: z.string().max(50, 'Middle name must be 50 characters or less').optional(),
-  role: z.enum(['ADMIN', 'PATIENT'], {
-    errorMap: () => ({ message: 'Role must be either ADMIN or PATIENT' }),
-  }),
+  role: z.enum(['ADMIN', 'PATIENT']),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
@@ -56,8 +54,7 @@ export const userCreateSchema = z.object({
  */
 export const userStatusUpdateSchema = z.object({
   isActive: z.boolean({
-    required_error: 'isActive is required',
-    invalid_type_error: 'isActive must be a boolean'
+    message: 'isActive must be a boolean'
   })
 });
 

@@ -5,11 +5,9 @@ import { z } from 'zod';
  * Used when ADMIN submits a request that requires SUPER_ADMIN approval
  */
 export const createPendingActionSchema = z.object({
-  actionType: z.enum(['REGISTER_STUDENT', 'DEACTIVATE_USER', 'DELETE_USER'], {
-    errorMap: () => ({ message: 'Invalid action type' }),
-  }),
+  actionType: z.enum(['REGISTER_STUDENT', 'DEACTIVATE_USER', 'DELETE_USER']),
   targetUserId: z.string().uuid('Invalid user ID').optional(),
-  actionData: z.record(z.any()), // JSON object - structure varies by action type
+  actionData: z.record(z.string(), z.unknown()), // JSON object - structure varies by action type
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional().default('MEDIUM'),
 });
 
@@ -44,14 +42,10 @@ export const registrationActionDataSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50),
   lastName: z.string().min(1, 'Last name is required').max(50),
   middleName: z.string().max(50).optional(),
-  dateOfBirth: z.date({ required_error: 'Date of birth is required' }),
+  dateOfBirth: z.coerce.date({ message: 'Date of birth is required' }),
   age: z.number().int().min(1).max(120),
-  sex: z.enum(['MALE', 'FEMALE'], {
-    errorMap: () => ({ message: 'Sex must be either MALE or FEMALE' }),
-  }),
-  gradeLevel: z.enum(['7', '8', '9', '10', '11', '12', 'Non-Graded'], {
-    message: 'Invalid grade level',
-  }),
+  sex: z.enum(['MALE', 'FEMALE']),
+  gradeLevel: z.enum(['7', '8', '9', '10', '11', '12', 'Non-Graded']),
   section: z.string().min(1, 'Section is required').max(50),
   lrn: z.string().length(12, 'LRN must be exactly 12 digits').regex(/^\d+$/, 'LRN must contain only numbers'),
   studentNumber: z.string().min(1, 'Student number is required').max(20),

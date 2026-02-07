@@ -37,3 +37,23 @@ export interface GradeLevelStats {
     studentCount: number;
   }[];
 }
+
+// --- Disease Trend Types ---
+
+export interface DiseaseMonthlyCount {
+  disease: string;
+  monthKey: string;   // "2025-01" format from DATE_FORMAT
+  count: number;
+}
+
+export interface DiseaseTrendEntry {
+  disease: string;
+  months: { label: string; count: number }[];  // label = "Jan 2025"
+  currentCount: number;   // count in the most recent month
+  previousCount: number;  // count in the month before that
+  percentChange: number | null;  // null when previousCount is 0
+}
+
+export interface DiseaseTrendsResponse {
+  trends: DiseaseTrendEntry[];
+}

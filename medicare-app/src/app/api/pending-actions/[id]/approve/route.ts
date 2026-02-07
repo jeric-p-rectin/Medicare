@@ -7,6 +7,7 @@ import {
 import { executePendingAction, notifyRequester } from '@/lib/pending-action-executor';
 import { approveActionSchema } from '@/lib/validations/pending-actions';
 import { logAction } from '@/lib/audit-logger';
+import { isErrorWithMessage, toErrorWithMessage } from '@/types/api-response';
 
 /**
  * PATCH /api/pending-actions/[id]/approve
@@ -85,36 +86,39 @@ export async function PATCH(
         message: executionResult.message,
         actionId: id,
       });
-    } catch (executionError: any) {
-      console.error('[PATCH /api/pending-actions/approve] Execution error:', executionError);
+    } catch (executionError: unknown) {
+      const error = toErrorWithMessage(executionError);
+      console.error('[PATCH /api/pending-actions/approve] Execution error:', error.message);
 
       // If execution fails, mark as approved but notify of failure
-      await approvePendingAction(id, session.user.id, `EXECUTION FAILED: ${executionError.message}`);
+      await approvePendingAction(id, session.user.id, `EXECUTION FAILED: ${error.message}`);
 
       // Notify requester of failure
       await notifyRequester(
         pendingAction.requestedById,
         pendingAction.actionType,
         'REJECTED',
-        `Action approved but execution failed: ${executionError.message}`
+        `Action approved but execution failed: ${error.message}`
       );
 
       return NextResponse.json(
         {
           error: 'Action approved but execution failed',
-          details: executionError.message,
+          details: error.message,
         },
         { status: 500 }
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     const { id: paramId } = await params;
-    console.error(`[PATCH /api/pending-actions/${paramId}/approve] Error:`, error);
+    const err = toErrorWithMessage(error);
+    console.error(`[PATCH /api/pending-actions/${paramId}/approve] Error:`, err.message);
 
     // Handle validation errors
-    if (error.name === 'ZodError') {
+    const zodError = error as { name?: string; errors?: unknown };
+    if (zodError.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: zodError.errors },
         { status: 400 }
       );
     }

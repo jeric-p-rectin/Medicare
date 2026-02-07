@@ -58,7 +58,7 @@ export async function getAlerts(options?: { unread?: boolean; limit?: number }):
   `;
 
   const whereClauses: string[] = [];
-  const params: any[] = [];
+  const params: (string | number)[] = [];
 
   if (options?.unread) {
     whereClauses.push('is_read = ?');
@@ -158,6 +158,23 @@ export async function outbreakAlertExists(disease: string, hoursAgo: number = 24
     SELECT COUNT(*) as count
     FROM alerts
     WHERE alert_type = 'OUTBREAK_SUSPECTED'
+    AND related_disease = ?
+    AND created_at >= DATE_SUB(NOW(), INTERVAL ? HOUR)
+  `;
+
+  const result = await query<{ count: number }>(sql, [disease, hoursAgo]);
+  return (result[0]?.count || 0) > 0;
+}
+
+/**
+ * Check if a DISEASE_TREND alert already exists for a disease within hoursAgo hours.
+ * Used for 24-hour spam prevention, mirroring outbreakAlertExists.
+ */
+export async function trendAlertExists(disease: string, hoursAgo: number = 24): Promise<boolean> {
+  const sql = `
+    SELECT COUNT(*) as count
+    FROM alerts
+    WHERE alert_type = 'DISEASE_TREND'
     AND related_disease = ?
     AND created_at >= DATE_SUB(NOW(), INTERVAL ? HOUR)
   `;

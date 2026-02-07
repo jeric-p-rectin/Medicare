@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { isErrorWithMessage } from '@/types/api-response';
 
 interface PasswordFormProps {
   userId: string;
@@ -53,8 +54,9 @@ export function PasswordForm({ userId }: PasswordFormProps) {
 
       toast.success('Password changed successfully');
       reset(); // Clear the form
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to change password');
+    } catch (error: unknown) {
+      const message = isErrorWithMessage(error) ? error.message : 'Failed to change password';
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

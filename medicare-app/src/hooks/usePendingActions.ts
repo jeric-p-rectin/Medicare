@@ -1,6 +1,7 @@
 import useSWR from 'swr';
 import type { PendingActionWithRequester } from '@/types/pending-action';
 import { toast } from 'sonner';
+import { isErrorWithMessage } from '@/types/api-response';
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
@@ -56,8 +57,9 @@ export function usePendingActions(options: UsePendingActionsOptions = {}) {
 
       // Refresh the list
       mutate();
-    } catch (error: any) {
-      console.error('Error approving pending action:', error);
+    } catch (error: unknown) {
+      const message = isErrorWithMessage(error) ? error.message : 'An unexpected error occurred';
+      console.error('Error approving pending action:', message);
       throw error;
     }
   };
@@ -81,8 +83,9 @@ export function usePendingActions(options: UsePendingActionsOptions = {}) {
 
       // Refresh the list
       mutate();
-    } catch (error: any) {
-      console.error('Error rejecting pending action:', error);
+    } catch (error: unknown) {
+      const message = isErrorWithMessage(error) ? error.message : 'An unexpected error occurred';
+      console.error('Error rejecting pending action:', message);
       throw error;
     }
   };
@@ -104,8 +107,9 @@ export function usePendingActions(options: UsePendingActionsOptions = {}) {
 
       // Refresh the list
       mutate();
-    } catch (error: any) {
-      console.error('Error cancelling pending action:', error);
+    } catch (error: unknown) {
+      const message = isErrorWithMessage(error) ? error.message : 'An unexpected error occurred';
+      console.error('Error cancelling pending action:', message);
       throw error;
     }
   };

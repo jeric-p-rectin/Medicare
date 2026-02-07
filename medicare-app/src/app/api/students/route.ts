@@ -4,6 +4,7 @@ import { findStudents, findStudentByUserId, createStudent } from '@/lib/queries/
 import { detectDuplicate } from '@/lib/duplicate-detection';
 import { logAction } from '@/lib/audit-logger';
 import bcrypt from 'bcryptjs';
+import type { GradeLevel } from '@/types/student';
 
 /**
  * GET /api/students
@@ -66,7 +67,7 @@ export async function GET(request: Request) {
       page,
       limit,
       search,
-      grade: grade as any,
+      grade: grade ? (grade as GradeLevel) : undefined,
       section
     });
 
@@ -186,9 +187,10 @@ export async function POST(request: Request) {
         healthHistory: data.healthHistory,
         createdById: session.user.id!
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle LRN duplicate constraint violation
-      if (error.code === 'ER_DUP_ENTRY' && error.message?.includes('lrn')) {
+      const dbError = error as { code?: string; message?: string };
+      if (dbError.code === 'ER_DUP_ENTRY' && dbError.message?.includes('lrn')) {
         return NextResponse.json(
           { error: 'A student with this LRN already exists' },
           { status: 409 }

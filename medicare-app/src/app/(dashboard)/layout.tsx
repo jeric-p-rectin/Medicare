@@ -4,6 +4,7 @@ import { SessionProvider } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { DashboardHeader } from '@/components/layout/dashboard-header';
 import { Toaster } from '@/components/ui/sonner';
+import { TrendAlertPopup } from '@/components/alerts/trend-alert-popup';
 
 export default async function DashboardLayout({
   children,
@@ -32,6 +33,7 @@ export default async function DashboardLayout({
         </div>
       </div>
       <Toaster />
+      <TrendAlertPopup />
     </SessionProvider>
   );
 }

@@ -73,7 +73,7 @@ export async function createMedicalRecord(data: MedicalRecordCreateInput): Promi
  */
 export async function updateMedicalRecord(id: string, data: MedicalRecordUpdateInput): Promise<void> {
   const updates: string[] = [];
-  const params: any[] = [];
+  const params: (string | number | Date | null)[] = [];
 
   if (data.visitDate) {
     updates.push('visit_date = ?');
@@ -109,7 +109,7 @@ export async function updateMedicalRecord(id: string, data: MedicalRecordUpdateI
   }
   if (data.isOutbreakRelated !== undefined) {
     updates.push('is_outbreak_related = ?');
-    params.push(data.isOutbreakRelated);
+    params.push(data.isOutbreakRelated ? 1 : 0);
   }
 
   if (updates.length === 0) return;

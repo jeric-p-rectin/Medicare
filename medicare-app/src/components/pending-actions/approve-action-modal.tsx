@@ -12,7 +12,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ActionStatusBadge } from './action-status-badge';
-import type { PendingActionWithRequester } from '@/types/pending-action';
+import type {
+  PendingActionWithRequester,
+  RegistrationActionData,
+  DeactivationActionData,
+  DeletionActionData,
+} from '@/types/pending-action';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
 interface ApproveActionModalProps {
@@ -85,7 +90,7 @@ export function ApproveActionModal({
   const renderActionDetails = () => {
     switch (action.actionType) {
       case 'REGISTER_STUDENT':
-        const regData = action.actionData as any;
+        const regData = action.actionData as RegistrationActionData;
         return (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-4">
@@ -139,7 +144,7 @@ export function ApproveActionModal({
 
       case 'DEACTIVATE_USER':
       case 'DELETE_USER':
-        const userData = action.actionData as any;
+        const userData = action.actionData as DeactivationActionData | DeletionActionData;
         return (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-4">

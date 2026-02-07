@@ -35,7 +35,7 @@ if (process.env.NODE_ENV === 'development') {
  * @param params - Array of parameter values
  * @returns Array of results
  */
-export async function query<T = any>(
+export async function query<T = RowDataPacket>(
   sql: string,
   params?: (string | number | boolean | Date | null)[]
 ): Promise<T[]> {
@@ -57,7 +57,7 @@ export async function query<T = any>(
  * @param params - Array of parameter values
  * @returns Single result or null
  */
-export async function queryOne<T = any>(
+export async function queryOne<T = RowDataPacket>(
   sql: string,
   params?: (string | number | boolean | Date | null)[]
 ): Promise<T | null> {

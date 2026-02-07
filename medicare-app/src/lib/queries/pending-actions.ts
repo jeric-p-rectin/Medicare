@@ -6,6 +6,9 @@ import type {
   PendingActionCreateInput,
   PendingActionFilters,
   ActionStatus,
+  RegistrationActionData,
+  DeactivationActionData,
+  DeletionActionData,
 } from '@/types/pending-action';
 
 /**
@@ -27,14 +30,24 @@ function getNotificationTitle(actionType: string): string {
 /**
  * Helper function to generate notification message based on action type
  */
-function getNotificationMessage(actionType: string, requesterName: string, actionData: any): string {
+function getNotificationMessage(
+  actionType: string,
+  requesterName: string,
+  actionData: RegistrationActionData | DeactivationActionData | DeletionActionData
+): string {
   switch (actionType) {
-    case 'REGISTER_STUDENT':
-      return `${requesterName} has submitted a student registration request for ${actionData.firstName} ${actionData.lastName} (Grade ${actionData.gradeLevel} ${actionData.section}). Please review in the Pending Approvals tab.`;
-    case 'DEACTIVATE_USER':
-      return `${requesterName} has requested to deactivate user ${actionData.username || actionData.fullName}. Please review in the Pending Approvals tab.`;
-    case 'DELETE_USER':
-      return `${requesterName} has requested to delete user ${actionData.username || actionData.fullName}. Please review in the Pending Approvals tab.`;
+    case 'REGISTER_STUDENT': {
+      const regData = actionData as RegistrationActionData;
+      return `${requesterName} has submitted a student registration request for ${regData.firstName} ${regData.lastName} (Grade ${regData.gradeLevel} ${regData.section}). Please review in the Pending Approvals tab.`;
+    }
+    case 'DEACTIVATE_USER': {
+      const userData = actionData as DeactivationActionData | DeletionActionData;
+      return `${requesterName} has requested to deactivate user ${userData.username || userData.fullName}. Please review in the Pending Approvals tab.`;
+    }
+    case 'DELETE_USER': {
+      const userData = actionData as DeactivationActionData | DeletionActionData;
+      return `${requesterName} has requested to delete user ${userData.username || userData.fullName}. Please review in the Pending Approvals tab.`;
+    }
     default:
       return `${requesterName} has submitted a new request. Please review in the Pending Approvals tab.`;
   }
@@ -114,7 +127,7 @@ export async function getPendingActions(filters?: PendingActionFilters): Promise
   `;
 
   const whereClauses: string[] = [];
-  const params: any[] = [];
+  const params: string[] = [];
 
   if (filters?.status) {
     whereClauses.push('pa.status = ?');
@@ -279,7 +292,7 @@ export async function pendingActionExists(
     AND status = 'PENDING'
   `;
 
-  const params: any[] = [actionType];
+  const params: string[] = [actionType];
 
   if (targetUserId) {
     sql += ' AND target_user_id = ?';

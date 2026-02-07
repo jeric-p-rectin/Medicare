@@ -8,7 +8,13 @@ import {
 import { createAlert } from '@/lib/queries/alerts';
 import { createPendingActionSchema } from '@/lib/validations/pending-actions';
 import { logAction } from '@/lib/audit-logger';
-import type { PendingActionFilters } from '@/types/pending-action';
+import type {
+  PendingActionFilters,
+  RegistrationActionData,
+  DeactivationActionData,
+  DeletionActionData,
+} from '@/types/pending-action';
+import { toErrorWithMessage } from '@/types/api-response';
 
 /**
  * Helper function to generate notification title based on action type
@@ -29,14 +35,24 @@ function getNotificationTitle(actionType: string): string {
 /**
  * Helper function to generate notification message based on action type
  */
-function getNotificationMessage(actionType: string, requesterName: string, actionData: any): string {
+function getNotificationMessage(
+  actionType: string,
+  requesterName: string,
+  actionData: RegistrationActionData | DeactivationActionData | DeletionActionData
+): string {
   switch (actionType) {
-    case 'REGISTER_STUDENT':
-      return `${requesterName} has submitted a student registration request for ${actionData.firstName} ${actionData.lastName} (Grade ${actionData.gradeLevel} ${actionData.section}). Please review in the Pending Approvals tab.`;
-    case 'DEACTIVATE_USER':
-      return `${requesterName} has requested to deactivate user ${actionData.username}. Please review in the Pending Approvals tab.`;
-    case 'DELETE_USER':
-      return `${requesterName} has requested to delete user ${actionData.username}. Please review in the Pending Approvals tab.`;
+    case 'REGISTER_STUDENT': {
+      const regData = actionData as RegistrationActionData;
+      return `${requesterName} has submitted a student registration request for ${regData.firstName} ${regData.lastName} (Grade ${regData.gradeLevel} ${regData.section}). Please review in the Pending Approvals tab.`;
+    }
+    case 'DEACTIVATE_USER': {
+      const userData = actionData as DeactivationActionData | DeletionActionData;
+      return `${requesterName} has requested to deactivate user ${userData.username}. Please review in the Pending Approvals tab.`;
+    }
+    case 'DELETE_USER': {
+      const userData = actionData as DeactivationActionData | DeletionActionData;
+      return `${requesterName} has requested to delete user ${userData.username}. Please review in the Pending Approvals tab.`;
+    }
     default:
       return `${requesterName} has submitted a new request. Please review in the Pending Approvals tab.`;
   }
@@ -123,7 +139,7 @@ export async function POST(request: Request) {
       actionType: validatedData.actionType,
       requestedById: session.user.id,
       targetUserId: validatedData.targetUserId,
-      actionData: validatedData.actionData as any,
+      actionData: validatedData.actionData as unknown as RegistrationActionData | DeactivationActionData | DeletionActionData,
       priority: validatedData.priority || 'MEDIUM',
     });
 
@@ -133,7 +149,7 @@ export async function POST(request: Request) {
       const alertId = await createAlert({
         alertType: 'SYSTEM',
         title: getNotificationTitle(validatedData.actionType),
-        message: getNotificationMessage(validatedData.actionType, requesterName, validatedData.actionData),
+        message: getNotificationMessage(validatedData.actionType, requesterName, validatedData.actionData as unknown as RegistrationActionData | DeactivationActionData | DeletionActionData),
         severity: validatedData.priority === 'HIGH' ? 'HIGH' : 'MEDIUM',
       });
       console.log(`[POST /api/pending-actions] Notification alert created (ID: ${alertId}) for SUPER_ADMIN`);
@@ -163,13 +179,15 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
-    console.error('[POST /api/pending-actions] Error:', error);
+  } catch (error: unknown) {
+    const err = toErrorWithMessage(error);
+    console.error('[POST /api/pending-actions] Error:', err.message);
 
     // Handle validation errors
-    if (error.name === 'ZodError') {
+    const zodError = error as { name?: string; errors?: unknown };
+    if (zodError.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: zodError.errors },
         { status: 400 }
       );
     }

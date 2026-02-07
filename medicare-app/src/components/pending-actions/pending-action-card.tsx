@@ -4,7 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ActionStatusBadge } from './action-status-badge';
-import type { PendingActionWithRequester } from '@/types/pending-action';
+import type {
+  PendingActionWithRequester,
+  RegistrationActionData,
+  DeactivationActionData,
+  DeletionActionData,
+} from '@/types/pending-action';
 import { cn } from '@/lib/utils';
 import { ClipboardList, UserX, Trash2, CheckCircle, XCircle, Clock } from 'lucide-react';
 
@@ -67,13 +72,13 @@ export function PendingActionCard({
   const getActionSummary = () => {
     switch (action.actionType) {
       case 'REGISTER_STUDENT':
-        const regData = action.actionData as any;
+        const regData = action.actionData as RegistrationActionData;
         return `${regData.firstName} ${regData.lastName} - Grade ${regData.gradeLevel} ${regData.section}`;
       case 'DEACTIVATE_USER':
-        const deactData = action.actionData as any;
+        const deactData = action.actionData as DeactivationActionData;
         return `${deactData.username} (${deactData.role})`;
       case 'DELETE_USER':
-        const delData = action.actionData as any;
+        const delData = action.actionData as DeletionActionData;
         return `${delData.username} (${delData.role})`;
       default:
         return '';

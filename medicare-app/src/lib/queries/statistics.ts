@@ -1,5 +1,5 @@
 import { query } from '../db';
-import type { DiseaseStats, TrendData, TimePeriod } from '@/types/statistics';
+import type { DiseaseStats, TrendData, TimePeriod, DiseaseMonthlyCount } from '@/types/statistics';
 
 /**
  * Get disease distribution for a time period (for pie/bar charts)
@@ -98,6 +98,27 @@ export async function getDiseaseCount(disease: string, days: number = 7): Promis
 
   const result = await query<{ count: number }>(sql, [disease, days]);
   return result[0]?.count || 0;
+}
+
+/**
+ * Get per-disease monthly case counts for the last 12 months.
+ * Returns one row per (disease, month) pair that has at least one case.
+ * Months with zero cases are NOT returned -- the API layer pads them.
+ */
+export async function getDiseaseMonthlyCounts(): Promise<DiseaseMonthlyCount[]> {
+  const sql = `
+    SELECT
+      disease_category as disease,
+      DATE_FORMAT(visit_date, '%Y-%m') as monthKey,
+      COUNT(*) as count
+    FROM medical_records
+    WHERE disease_category IS NOT NULL
+      AND visit_date >= DATE_SUB(CURDATE(), INTERVAL 11 MONTH)
+    GROUP BY disease_category, DATE_FORMAT(visit_date, '%Y-%m')
+    ORDER BY disease_category ASC, monthKey ASC
+  `;
+
+  return query<DiseaseMonthlyCount>(sql);
 }
 
 /**

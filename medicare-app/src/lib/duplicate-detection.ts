@@ -1,5 +1,6 @@
 import { query } from './db';
 import { createAlert } from './queries/alerts';
+import { DuplicateDetectionRow } from '@/types/api-response';
 
 /**
  * Compare two dates by YYYY-MM-DD string (ignores time/timezone)
@@ -50,7 +51,7 @@ export async function detectDuplicate(
     )
   `;
 
-  const duplicates = await query<any>(sql, [
+  const duplicates = await query<DuplicateDetectionRow>(sql, [
     studentId,
     firstName,
     lastName,
@@ -60,7 +61,7 @@ export async function detectDuplicate(
 
   // Process each potential duplicate
   for (const duplicate of duplicates) {
-    let matchingFields: string[] = [];
+    const matchingFields: string[] = [];
     let similarityScore = 0;
 
     // Check which fields match (case-insensitive)

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { userCreateSchema, UserCreateInput } from '@/lib/validations/account';
+import { isErrorWithMessage } from '@/types/api-response';
 import {
   Dialog,
   DialogContent,
@@ -115,8 +116,9 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
       });
 
       onSuccess();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create user');
+    } catch (error: unknown) {
+      const message = isErrorWithMessage(error) ? error.message : 'Failed to create user';
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

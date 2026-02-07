@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getStudentMedicalRecords, createMedicalRecord } from '@/lib/queries/medical-records';
 import { checkOutbreakThreshold } from '@/lib/alert-system';
+import { checkDiseaseTrend } from '@/lib/disease-trend';
 import { logAction } from '@/lib/audit-logger';
 
 /**
@@ -74,6 +75,7 @@ export async function POST(
     // Check for outbreak if disease category is specified
     if (data.diseaseCategory) {
       await checkOutbreakThreshold(data.diseaseCategory);
+      await checkDiseaseTrend(data.diseaseCategory);
     }
 
     // Log the action

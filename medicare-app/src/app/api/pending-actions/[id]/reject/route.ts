@@ -7,6 +7,7 @@ import {
 import { notifyRequester } from '@/lib/pending-action-executor';
 import { rejectActionSchema } from '@/lib/validations/pending-actions';
 import { logAction } from '@/lib/audit-logger';
+import { toErrorWithMessage } from '@/types/api-response';
 
 /**
  * PATCH /api/pending-actions/[id]/reject
@@ -81,14 +82,16 @@ export async function PATCH(
       message: 'Pending action rejected',
       actionId: id,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const { id: paramId } = await params;
-    console.error(`[PATCH /api/pending-actions/${paramId}/reject] Error:`, error);
+    const err = toErrorWithMessage(error);
+    console.error(`[PATCH /api/pending-actions/${paramId}/reject] Error:`, err.message);
 
     // Handle validation errors
-    if (error.name === 'ZodError') {
+    const zodError = error as { name?: string; errors?: unknown };
+    if (zodError.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: zodError.errors },
         { status: 400 }
       );
     }

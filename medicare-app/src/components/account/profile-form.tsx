@@ -8,6 +8,7 @@ import { User } from '@/types/user';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { isErrorWithMessage } from '@/types/api-response';
 import { Loader2 } from 'lucide-react';
 
 interface ProfileFormProps {
@@ -54,8 +55,9 @@ export function ProfileForm({ user, onUpdate }: ProfileFormProps) {
 
       toast.success('Profile updated successfully');
       onUpdate(result.user);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile');
+    } catch (error: unknown) {
+      const message = isErrorWithMessage(error) ? error.message : 'Failed to update profile';
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

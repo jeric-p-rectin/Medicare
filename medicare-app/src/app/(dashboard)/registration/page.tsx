@@ -140,7 +140,8 @@ export default function RegistrationPage() {
         }
       } else {
         if (result.duplicates) {
-          setError(`Potential duplicate detected. Similar students found: ${result.duplicates.map((d: any) => d.name).join(', ')}`);
+          interface DuplicateResult { name: string }
+          setError(`Potential duplicate detected. Similar students found: ${(result.duplicates as DuplicateResult[]).map((d) => d.name).join(', ')}`);
         } else {
           setError(result.error || 'Failed to register student');
         }

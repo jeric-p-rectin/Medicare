@@ -103,26 +103,41 @@ medicare-app/
 │   ├── app/                    # Next.js App Router
 │   │   ├── (auth)/            # Auth route group (login)
 │   │   ├── (dashboard)/       # Protected dashboard routes
+│   │   │   ├── dashboard/     # Main dashboard + grade/[grade] sub-route
+│   │   │   ├── account/       # User account & management
+│   │   │   ├── alerts/        # Alert list + [id] detail view
+│   │   │   ├── patients/      # Patient list + [id] detail, edit, new-record
+│   │   │   ├── registration/  # Student registration form
+│   │   │   └── statistics/    # Statistics dashboard
+│   │   ├── patient-portal/    # Patient self-service portal
 │   │   ├── api/               # API route handlers
 │   │   └── layout.tsx         # Root layout with SessionProvider
 │   ├── components/            # React components
 │   │   ├── layout/           # Navbar, Sidebar, Header
 │   │   ├── landing/          # Landing page sections
-│   │   ├── auth/             # Auth components
+│   │   ├── auth/             # Auth components (logout buttons)
 │   │   ├── alerts/           # Alert system UI
-│   │   ├── registration/     # Registration forms
+│   │   ├── account/          # Profile form, user management, password, create-user
+│   │   ├── registration/     # Registration forms, credential card, section combobox
+│   │   ├── pending-actions/  # Pending action list, card, approve modal, status badge
+│   │   ├── animations/       # ParticleBackground, ScrollIndicator (landing page)
+│   │   ├── forms/            # Login form
+│   │   ├── providers/        # SessionProvider wrapper
 │   │   └── ui/               # shadcn-style UI primitives
 │   ├── lib/                   # Business logic & utilities
 │   │   ├── db.ts             # Database connection pool & query helpers
 │   │   ├── auth.ts           # NextAuth configuration
+│   │   ├── rbac.ts           # Role-based access control
 │   │   ├── queries/          # Domain-specific query functions
+│   │   ├── validations/      # Zod schemas (auth, account, pending-actions)
 │   │   ├── alert-system.ts   # Outbreak detection logic
 │   │   ├── duplicate-detection.ts
+│   │   ├── pending-action-executor.ts
 │   │   └── audit-logger.ts
 │   ├── types/                 # TypeScript type definitions
 │   ├── hooks/                 # Custom React hooks
 │   └── middleware.ts          # Auth route protection
-├── database/                  # SQL schema & setup scripts
+├── database/                  # SQL schema, seeds, migrations, setup script
 └── public/                    # Static assets
 ```
 
@@ -143,8 +158,10 @@ medicare-app/
 - `statistics.ts` - Dashboard statistics
 - `sections.ts` - Academic sections
 - `users.ts` - User authentication
+- `dashboard.ts` - Dashboard statistics queries
+- `pending-actions.ts` - Pending action database operations
 
-**Database Schema:** 9 core tables:
+**Database Schema:** 8 core tables:
 - `users` - System users with role-based access (SUPER_ADMIN, ADMIN, PATIENT)
 - `students` - Patient records linked to users (one-to-one)
 - `sections` - Academic sections (Grades 7-12, Sections A-D)
@@ -251,6 +268,7 @@ All API routes in `src/app/api/`:
 - `GET /api/students/[id]` - Get single student
 - `PUT /api/students/[id]` - Update student
 - `GET /api/students/[id]/records` - Medical records for student
+- `GET /api/students/user/[userId]` - Get student record by user ID
 
 **Alerts:**
 - `GET /api/alerts` - List alerts (filter by unread)
@@ -258,6 +276,7 @@ All API routes in `src/app/api/`:
 - `GET /api/alerts/[id]` - Alert details
 - `DELETE /api/alerts/[id]` - Delete alert
 - `PUT /api/alerts/[id]/read` - Mark as read
+- `POST /api/alerts/trigger` - Manually trigger outbreak alert check
 
 **Dashboard:**
 - `GET /api/dashboard/stats` - School-wide statistics
@@ -281,9 +300,17 @@ All API routes in `src/app/api/`:
 - `PUT /api/users/[id]` - Update user profile
 - `PATCH /api/users/[id]` - Update user status (deactivate/activate)
 - `DELETE /api/users/[id]` - Delete user (hard delete with pending approval for ADMIN)
+- `PATCH /api/users/[id]/password` - Update user password
+
+**Sections & Categories:**
+- `GET /api/sections` - List academic sections
+- `GET /api/disease-categories` - List disease categories
 
 **Auth:**
 - `/api/auth/[...nextauth]` - NextAuth endpoints
+
+**Debug (dev only):**
+- `GET /api/debug/session` - Current session info
 
 ### Component Patterns
 
@@ -292,21 +319,42 @@ All API routes in `src/app/api/`:
 **Hooks:**
 - `useAlerts()` - Alert fetching with SWR, returns: `{ alerts, error, isLoading, unreadCount, markAsRead(), dismissAlert() }`
 - `usePendingActions()` - Pending actions with SWR, returns: `{ pendingActions, pendingCount, isLoading, approvePendingAction(), rejectPendingAction(), cancelPendingAction() }`
+- `useSections()` - Fetches academic sections/grades via SWR
+- `use-scroll-animation` - Scroll-triggered animation state for landing page sections
 
 **Layout Components:**
 - `navbar.tsx` - Landing page navigation
 - `sidebar.tsx` - Dashboard sidebar (grade links 7-12)
 - `dashboard-header.tsx` - Header with user info & alert popover
 
+**Account Components** (`src/components/account/`):
+- `profile-form.tsx` - User profile editing
+- `password-form.tsx` - Password change form
+- `user-management-table.tsx` - User list table (ADMIN/SUPER_ADMIN)
+- `create-user-dialog.tsx` - Modal for creating new users
+- `account-info-card.tsx` - Read-only account info display
+- `patient-info-section.tsx` - Patient-specific info within account page
+
+**Pending Actions Components** (`src/components/pending-actions/`):
+- `pending-action-list.tsx` - List of pending approval requests
+- `pending-action-card.tsx` - Individual action card
+- `approve-action-modal.tsx` - Confirmation modal for approval
+- `action-status-badge.tsx` - Status indicator badge
+
+**Animation Components** (`src/components/animations/`):
+- `ParticleBackground.tsx` - Animated particle backdrop (landing page)
+- `ScrollIndicator.tsx` - Scroll-triggered animation indicator
+
 **Form Validation:**
 - React Hook Form + Zod schemas
-- Validation schemas in `src/lib/validations/`
+- Validation schemas in `src/lib/validations/`: `auth.ts`, `account.ts`, `pending-actions.ts`
 
 ## Important Architectural Patterns
 
 ### 1. Route Groups
 - `(auth)` - Public authentication pages
 - `(dashboard)` - Protected dashboard with shared layout
+- `patient-portal` - Patient self-service portal (limited access)
 
 ### 2. Database Transactions
 Always use `transaction()` wrapper for multi-table operations:
@@ -405,6 +453,7 @@ const { data, error, mutate } = useSWR(
 **Core Logic:**
 - `src/lib/db.ts` - Database abstraction
 - `src/lib/auth.ts` - NextAuth config
+- `src/lib/rbac.ts` - Role-based access control
 - `src/lib/alert-system.ts` - Outbreak detection
 - `src/lib/duplicate-detection.ts` - Duplicate matching
 - `src/lib/pending-action-executor.ts` - Approval workflow execution
@@ -413,8 +462,15 @@ const { data, error, mutate } = useSWR(
 
 **Main Pages:**
 - `src/app/(dashboard)/dashboard/page.tsx` - Main dashboard
+- `src/app/(dashboard)/dashboard/grade/[grade]/page.tsx` - Grade-specific dashboard
 - `src/app/(dashboard)/registration/page.tsx` - Student registration
 - `src/app/(dashboard)/patients/page.tsx` - Patient list
+- `src/app/(dashboard)/patients/[id]/page.tsx` - Patient detail view
+- `src/app/(dashboard)/patients/[id]/edit/page.tsx` - Patient edit form
+- `src/app/(dashboard)/patients/[id]/new-record/page.tsx` - New medical record
 - `src/app/(dashboard)/alerts/page.tsx` - Alert management
+- `src/app/(dashboard)/alerts/[id]/page.tsx` - Alert detail view
+- `src/app/(dashboard)/account/page.tsx` - Account & user management
 - `src/app/(dashboard)/statistics/page.tsx` - Statistics dashboard
 - `src/app/(auth)/login/page.tsx` - Login page
+- `src/app/patient-portal/page.tsx` - Patient self-service portal

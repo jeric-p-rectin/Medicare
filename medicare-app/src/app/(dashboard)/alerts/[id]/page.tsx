@@ -89,7 +89,7 @@ export default function AlertDetailPage() {
           <div className="text-center">
             <XCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
             <h2 className="text-2xl font-bold text-gray-700 mb-2">Alert Not Found</h2>
-            <p className="text-gray-500 mb-6">The alert you're looking for doesn't exist.</p>
+            <p className="text-gray-500 mb-6">The alert you&apos;re looking for doesn&apos;t exist.</p>
             <Button onClick={() => router.push('/alerts')}>Back to Alerts</Button>
           </div>
         </div>

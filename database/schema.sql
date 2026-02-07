@@ -132,7 +132,7 @@ CREATE TABLE medical_records (
 -- =====================================================
 CREATE TABLE alerts (
   id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
-  alert_type ENUM('OUTBREAK_SUSPECTED', 'DUPLICATE_DETECTED', 'SYSTEM') NOT NULL,
+  alert_type ENUM('OUTBREAK_SUSPECTED', 'DUPLICATE_DETECTED', 'SYSTEM', 'DISEASE_TREND') NOT NULL,
   title VARCHAR(200) NOT NULL,
   message TEXT NOT NULL,
   severity ENUM('LOW', 'MEDIUM', 'HIGH', 'CRITICAL') NOT NULL,

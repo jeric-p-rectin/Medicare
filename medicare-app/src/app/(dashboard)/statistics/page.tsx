@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DiseaseHistogram } from '@/components/statistics/disease-histogram';
 import {
   Select,
   SelectContent,
@@ -25,7 +26,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import type { StatisticsData, TimePeriod } from '@/types/statistics';
+import type { StatisticsData, TimePeriod, DiseaseTrendsResponse } from '@/types/statistics';
 
 const COLORS = ['#C41E3A', '#E63946', '#DC143C', '#E57373', '#8B1A2E', '#FF6B6B'];
 
@@ -33,10 +34,16 @@ export default function StatisticsDashboard() {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('month');
   const [data, setData] = useState<StatisticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [trendData, setTrendData] = useState<DiseaseTrendsResponse | null>(null);
+  const [trendsLoading, setTrendsLoading] = useState(true);
 
   useEffect(() => {
     fetchStatistics();
   }, [timePeriod]);
+
+  useEffect(() => {
+    fetchDiseaseTrends();
+  }, []); // trends data is not period-dependent -- always 12 months
 
   const fetchStatistics = async () => {
     try {
@@ -49,6 +56,20 @@ export default function StatisticsDashboard() {
       console.error('Error fetching statistics:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDiseaseTrends = async () => {
+    try {
+      const response = await fetch('/api/statistics/disease-trends');
+      if (response.ok) {
+        const result = await response.json();
+        setTrendData(result);
+      }
+    } catch (error) {
+      console.error('Error fetching disease trends:', error);
+    } finally {
+      setTrendsLoading(false);
     }
   };
 
@@ -210,6 +231,36 @@ export default function StatisticsDashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* Disease Trend Histograms */}
+      <div className="mt-8">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">
+          Disease Trend Histograms
+        </h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Monthly case counts for each disease over the last 12 months
+        </p>
+
+        {trendsLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-[#C41E3A]" />
+          </div>
+        ) : trendData && trendData.trends.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {trendData.trends.map((entry, index) => (
+              <DiseaseHistogram key={entry.disease} entry={entry} colorIndex={index} />
+            ))}
+          </div>
+        ) : (
+          <Card className="bg-white rounded-2xl shadow-lg">
+            <CardContent className="py-8">
+              <div className="text-center text-gray-500">
+                <p className="text-sm">No disease data available for histograms.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

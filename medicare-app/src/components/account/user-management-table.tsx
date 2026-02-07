@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { isErrorWithMessage } from '@/types/api-response';
 import {
   Table,
   TableBody,
@@ -43,8 +44,9 @@ export function UserManagementTable() {
       }
 
       setUsers(result.users);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to fetch users');
+    } catch (error: unknown) {
+      const message = isErrorWithMessage(error) ? error.message : 'Failed to fetch users';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -80,8 +82,9 @@ export function UserManagementTable() {
       }
 
       fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update user status');
+    } catch (error: unknown) {
+      const message = isErrorWithMessage(error) ? error.message : 'Failed to update user status';
+      toast.error(message);
     }
   };
 
@@ -111,8 +114,9 @@ export function UserManagementTable() {
       }
 
       fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to delete user');
+    } catch (error: unknown) {
+      const message = isErrorWithMessage(error) ? error.message : 'Failed to delete user';
+      toast.error(message);
     }
   };
 

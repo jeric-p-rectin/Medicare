@@ -3,7 +3,11 @@
     "allow": [
       "Bash(find:*)",
       "Bash(ls:*)",
-      "mcp__mysql__mysql_query"
+      "mcp__mysql__mysql_query",
+      "Bash(npm run lint)",
+      "Bash(npx eslint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

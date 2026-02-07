@@ -1,4 +1,4 @@
-import { AlertTriangle, Users, Info } from 'lucide-react';
+import { AlertTriangle, Users, Info, TrendingUp } from 'lucide-react';
 import type { AlertType, AlertSeverity } from '@/types/alert';
 import { cn } from '@/lib/utils';
 
@@ -7,6 +7,14 @@ interface AlertIconProps {
   severity: AlertSeverity;
   className?: string;
 }
+
+// Module-level constant mapping to prevent component creation during render
+const ALERT_TYPE_ICONS: Record<AlertType, typeof AlertTriangle> = {
+  OUTBREAK_SUSPECTED: AlertTriangle,
+  DUPLICATE_DETECTED: Users,
+  DISEASE_TREND: TrendingUp,
+  SYSTEM: Info,
+} as const;
 
 export function AlertIcon({ type, severity, className }: AlertIconProps) {
   const getSeverityColors = (severity: AlertSeverity) => {
@@ -24,20 +32,7 @@ export function AlertIcon({ type, severity, className }: AlertIconProps) {
     }
   };
 
-  const getIcon = (type: AlertType) => {
-    switch (type) {
-      case 'OUTBREAK_SUSPECTED':
-        return AlertTriangle;
-      case 'DUPLICATE_DETECTED':
-        return Users;
-      case 'SYSTEM':
-        return Info;
-      default:
-        return Info;
-    }
-  };
-
-  const Icon = getIcon(type);
+  const Icon = ALERT_TYPE_ICONS[type];
   const colors = getSeverityColors(severity);
 
   return (

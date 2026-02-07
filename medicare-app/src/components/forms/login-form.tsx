@@ -61,6 +61,7 @@ export function LoginForm() {
       // Success - fetch session to determine role-based redirect
       const sessionResponse = await fetch('/api/auth/session');
       const session = await sessionResponse.json();
+      if (process.env.NODE_ENV === 'development') console.log('[LOGIN DEBUG] Session response:', session);
 
       if (session?.user?.role === 'PATIENT') {
         router.push('/patient-portal');

@@ -69,6 +69,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // If url is relative (starts with /), allow it
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+
+      // If url starts with baseUrl (same domain), allow it
+      if (url.startsWith(baseUrl)) return url;
+
+      // Otherwise, default to base URL (prevents open redirect)
+      return baseUrl;
+    },
   },
   pages: {
     signIn: '/login',

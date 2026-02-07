@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { query, queryOne, execute } from '../db';
 import type { Alert, AlertCreateInput } from '@/types/alert';
 
@@ -98,7 +97,7 @@ export async function markAlertAsRead(id: string): Promise<void> {
  * Create a new alert
  */
 export async function createAlert(data: AlertCreateInput): Promise<string> {
-  const alertId = randomUUID();
+  const alertId = crypto.randomUUID();
 
   const sql = `
     INSERT INTO alerts (

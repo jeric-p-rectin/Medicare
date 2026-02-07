@@ -218,5 +218,5 @@ export async function notifyRequester(
     recipientUserId: requesterId,  // Send notification to the requesting ADMIN
   });
 
-  console.log(`[notifyRequester] Notification sent to requester ${requesterId}:`, title);
+  if (process.env.NODE_ENV === 'development') console.log(`[notifyRequester] Notification sent to requester ${requesterId}:`, title);
 }

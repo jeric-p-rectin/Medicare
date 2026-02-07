@@ -152,7 +152,7 @@ export async function POST(request: Request) {
         message: getNotificationMessage(validatedData.actionType, requesterName, validatedData.actionData as unknown as RegistrationActionData | DeactivationActionData | DeletionActionData),
         severity: validatedData.priority === 'HIGH' ? 'HIGH' : 'MEDIUM',
       });
-      console.log(`[POST /api/pending-actions] Notification alert created (ID: ${alertId}) for SUPER_ADMIN`);
+      if (process.env.NODE_ENV === 'development') console.log(`[POST /api/pending-actions] Notification alert created (ID: ${alertId}) for SUPER_ADMIN`);
     } catch (alertError) {
       // Don't fail the entire request if alert creation fails
       // The pending action is still created successfully

@@ -20,8 +20,10 @@ export async function findStudents(options: StudentSearchOptions): Promise<Stude
   const offset = (pageInt - 1) * limitInt;
 
   // DEBUG: Log validated values
-  console.log('[findStudents] Pagination:', { pageInt, limitInt, offset });
-  console.log('[findStudents] Filters:', { search, grade, section });
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[findStudents] Pagination:', { pageInt, limitInt, offset });
+    console.log('[findStudents] Filters:', { search, grade, section });
+  }
 
   const whereClauses: string[] = [];
   const params: (string | number)[] = [];

@@ -42,7 +42,7 @@ export async function query<T = RowDataPacket>(
   try {
     // Filter out undefined values and log for debugging
     const cleanParams = params?.filter(p => p !== undefined);
-    console.log('[DEBUG] Query params:', cleanParams);
+    if (process.env.NODE_ENV === 'development') console.log('[DEBUG] Query params:', cleanParams);
     const [results] = await pool.execute<RowDataPacket[]>(sql, cleanParams);
     return results as T[];
   } catch (error) {
@@ -78,7 +78,7 @@ export async function execute(
   try {
     // Filter out undefined values and log for debugging
     const cleanParams = params?.filter(p => p !== undefined);
-    console.log('[DEBUG] Execute params:', cleanParams);
+    if (process.env.NODE_ENV === 'development') console.log('[DEBUG] Execute params:', cleanParams);
     const [result] = await pool.execute<ResultSetHeader>(sql, cleanParams);
     return result;
   } catch (error) {

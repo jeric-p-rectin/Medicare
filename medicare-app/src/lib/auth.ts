@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { findUserByUsername, updateUserLastLogin } from './queries/users';
+import type { UserRole } from '@/types/user';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -64,8 +65,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       // Add custom fields to session from JWT
       if (session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
+        session.user.id = token.id as string;
+        session.user.role = token.role as UserRole;
       }
       return session;
     },

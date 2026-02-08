@@ -52,7 +52,7 @@ export function Hero() {
               : 'opacity-0 translate-y-8'
           }`}
           style={{
-            fontSize: 'clamp(48px, 8vw, 96px)',
+            fontSize: 'clamp(36px, 8vw, 96px)',
           }}
         >
           <span className="text-medicare-red">MED-Alert</span>

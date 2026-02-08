@@ -140,7 +140,7 @@ export default function SchoolWideDashboard() {
                             flex items-center justify-center shadow-lg shadow-red-500/30">
                   <span className="text-4xl font-bold text-white">{grade}</span>
                 </div>
-                <div className="text-3xl font-bold text-gray-800 mb-1">
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-1">
                   {getStudentCountForGrade(grade)}
                 </div>
                 <div className="text-sm text-gray-500">Students</div>

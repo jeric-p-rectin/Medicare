@@ -126,7 +126,7 @@ export default function StatisticsDashboard() {
                 <CardTitle>Disease Distribution</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
                     <Pie
                       data={data.diseaseBreakdown}
@@ -154,7 +154,7 @@ export default function StatisticsDashboard() {
                 <CardTitle>Cases by Category</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={data.diseaseBreakdown}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
@@ -174,7 +174,7 @@ export default function StatisticsDashboard() {
               <CardTitle>Trend Over Time</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
+              <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={data.trendData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />

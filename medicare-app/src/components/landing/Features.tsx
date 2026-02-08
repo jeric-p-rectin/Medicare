@@ -70,7 +70,7 @@ export function Features() {
             <div
               key={feature.title}
               className={cn(
-                'group text-center p-10 rounded-3xl bg-white relative overflow-hidden transition-all duration-500 hover:-translate-y-3',
+                'group text-center p-6 sm:p-8 lg:p-10 rounded-3xl bg-white relative overflow-hidden transition-all duration-500 hover:-translate-y-3',
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               )}
               style={{

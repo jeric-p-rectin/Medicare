@@ -93,7 +93,7 @@ export default function AlertsPage() {
 
       {/* Filter Tabs */}
       <div className="mb-6 border-b border-gray-200">
-        <div className="flex gap-1">
+        <div className="flex gap-1 overflow-x-auto pb-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}

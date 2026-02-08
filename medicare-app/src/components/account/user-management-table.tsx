@@ -214,10 +214,10 @@ export function UserManagementTable() {
               <TableRow className="bg-[#FFF5F6]">
                 <TableHead className="font-semibold text-gray-700">Name</TableHead>
                 <TableHead className="font-semibold text-gray-700">Username</TableHead>
-                <TableHead className="font-semibold text-gray-700">Email</TableHead>
+                <TableHead className="hidden md:table-cell font-semibold text-gray-700">Email</TableHead>
                 <TableHead className="font-semibold text-gray-700">Role</TableHead>
                 <TableHead className="font-semibold text-gray-700">Status</TableHead>
-                <TableHead className="font-semibold text-gray-700">Last Login</TableHead>
+                <TableHead className="hidden lg:table-cell font-semibold text-gray-700">Last Login</TableHead>
                 <TableHead className="font-semibold text-gray-700 text-right">
                   Actions
                 </TableHead>
@@ -237,7 +237,7 @@ export function UserManagementTable() {
                       {user.first_name} {user.last_name}
                     </TableCell>
                     <TableCell className="font-mono text-sm">{user.username}</TableCell>
-                    <TableCell>{user.email || 'N/A'}</TableCell>
+                    <TableCell className="hidden md:table-cell">{user.email || 'N/A'}</TableCell>
                     <TableCell>
                       <Badge className={getRoleBadgeClass(user.role)}>
                         {formatRoleName(user.role)}
@@ -254,7 +254,7 @@ export function UserManagementTable() {
                         {user.is_active ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm">
+                    <TableCell className="hidden lg:table-cell text-sm">
                       {user.last_login
                         ? format(new Date(user.last_login), 'MMM dd, yyyy')
                         : 'Never'}

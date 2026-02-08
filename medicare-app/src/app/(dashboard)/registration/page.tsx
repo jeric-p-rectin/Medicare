@@ -186,7 +186,7 @@ export default function RegistrationPage() {
               <div>
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Personal Information</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">
                       First Name <span className="text-red-500">*</span>
@@ -233,7 +233,7 @@ export default function RegistrationPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                   <div>
                     <Label htmlFor="dateOfBirth" className="block text-sm font-semibold text-gray-700 mb-2">
                       Date of Birth <span className="text-red-500">*</span>
@@ -307,7 +307,7 @@ export default function RegistrationPage() {
               <div className="pt-6 border-t border-gray-200">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Academic Information</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="gradeLevel" className="block text-sm font-semibold text-gray-700 mb-2">
                       Grade Level <span className="text-red-500">*</span>
@@ -392,7 +392,7 @@ export default function RegistrationPage() {
                   Parents or Guardian Information
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="parentGuardianName" className="block text-sm font-semibold text-gray-700 mb-2">
                       Name <span className="text-red-500">*</span>

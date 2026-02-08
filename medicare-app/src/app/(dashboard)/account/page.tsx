@@ -115,7 +115,7 @@ export default function AccountPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white rounded-xl p-1 shadow-sm border border-gray-100">
+          <TabsList className="bg-white rounded-xl p-1 shadow-sm border border-gray-100 overflow-x-auto">
             {visibleTabs.map((tab) => (
               <TabsTrigger
                 key={tab.value}

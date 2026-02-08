@@ -19,8 +19,8 @@ export async function GET(
 
     const { grade } = await params;
 
-    // Validate grade (7-12)
-    if (!['7', '8', '9', '10', '11', '12'].includes(grade)) {
+    // Validate grade (7-12 and Non-Graded)
+    if (!['7', '8', '9', '10', '11', '12', 'Non-Graded'].includes(grade)) {
       return NextResponse.json({ error: 'Invalid grade level' }, { status: 400 });
     }
 

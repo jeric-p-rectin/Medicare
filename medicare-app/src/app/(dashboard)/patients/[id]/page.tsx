@@ -70,7 +70,7 @@ export default function IndividualPatientPage() {
         Back to Patient List
       </Button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Left Column - Patient Info */}
         <div className="lg:col-span-1">
           <Card className="bg-white rounded-2xl shadow-lg">

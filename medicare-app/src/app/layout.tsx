@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   title: "MED-Alert - Medical Electronic Database with Alert System",
   description: "MED-Alert - A comprehensive healthcare management system for Bajet-Castillo High School Clinic and Barangay Health Centers",
   keywords: ["medical records", "health center", "student health", "barangay health", "MED-Alert"],
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({

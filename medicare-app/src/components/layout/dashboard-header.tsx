@@ -49,12 +49,12 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             >
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
-            <div className="hidden sm:block">
-              <p className="font-medium text-gray-800">
+            <div className="block">
+              <p className="font-medium text-gray-800 truncate max-w-[100px] sm:max-w-none">
                 {user?.name || 'User'}
               </p>
               <span
-                className="text-xs px-2 py-0.5 rounded-full font-medium"
+                className="hidden sm:inline-flex text-xs px-2 py-0.5 rounded-full font-medium"
                 style={getRoleBadgeStyle(user?.role || '')}
               >
                 {user?.role || 'User'}

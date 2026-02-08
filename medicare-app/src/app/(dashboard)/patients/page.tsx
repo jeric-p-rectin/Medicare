@@ -207,13 +207,14 @@ export default function PatientsPage() {
 
         {/* Patient Table */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <Table>
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <Table>
             <TableHeader className="bg-[#FFF5F6]">
               <TableRow>
                 <TableHead className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
                   Student Name
                 </TableHead>
-                <TableHead className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <TableHead className="hidden sm:table-cell px-6 py-4 text-left text-sm font-semibold text-gray-700">
                   Grade Level and Section
                 </TableHead>
                 <TableHead className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
@@ -246,7 +247,7 @@ export default function PatientsPage() {
                     <TableCell className="px-6 py-4 font-medium text-gray-800">
                       {patient.lastName}, {patient.firstName} {patient.middleName || ''}
                     </TableCell>
-                    <TableCell className="px-6 py-4 text-gray-600">
+                    <TableCell className="hidden sm:table-cell px-6 py-4 text-gray-600">
                       Grade {patient.gradeLevel} - {patient.section}
                     </TableCell>
                     <TableCell className="px-6 py-4 text-center">
@@ -269,6 +270,7 @@ export default function PatientsPage() {
               )}
             </TableBody>
           </Table>
+          </div>
 
           {/* Pagination */}
           {data && data.totalPages > 1 && (

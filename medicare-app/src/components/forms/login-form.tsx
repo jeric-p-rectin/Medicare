@@ -60,10 +60,25 @@ export function LoginForm() {
 
       // Success - fetch session to determine role-based redirect
       const sessionResponse = await fetch('/api/auth/session');
+
+      if (!sessionResponse.ok) {
+        setError('Failed to establish session. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
       const session = await sessionResponse.json();
       if (process.env.NODE_ENV === 'development') console.log('[LOGIN DEBUG] Session response:', session);
 
-      if (session?.user?.role === 'PATIENT') {
+      // Validate session has user data before redirecting
+      if (!session?.user) {
+        setError('Session not found. Please try logging in again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Role-based redirect
+      if (session.user.role === 'PATIENT') {
         router.push('/patient-portal');
       } else {
         router.push('/dashboard');

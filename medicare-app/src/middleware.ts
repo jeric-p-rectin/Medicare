@@ -31,6 +31,11 @@ export async function middleware(request: NextRequest) {
   const isLoggedIn = !!token;
   const userRole = token?.role as string | undefined;
 
+  // Debug logging for auth issues
+  if (process.env.NODE_ENV === 'development' && !token) {
+    console.log('[MIDDLEWARE] getToken returned null - NEXTAUTH_SECRET may be wrong or missing');
+  }
+
   // Public routes handling
   if (isPublicRoute) {
     // If logged in and trying to access login page, redirect based on role

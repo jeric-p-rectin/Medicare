@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { auth } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -22,18 +22,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Get the token
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET
-  });
+  // Get the session (Edge Runtime compatible)
+  const session = await auth();
 
-  const isLoggedIn = !!token;
-  const userRole = token?.role as string | undefined;
+  const isLoggedIn = !!session?.user;
+  const userRole = session?.user?.role as string | undefined;
 
   // Debug logging for auth issues
-  if (process.env.NODE_ENV === 'development' && !token) {
-    console.log('[MIDDLEWARE] getToken returned null - NEXTAUTH_SECRET may be wrong or missing');
+  if (process.env.NODE_ENV === 'development' && !session?.user) {
+    console.log('[MIDDLEWARE] auth() returned null session - user not authenticated');
   }
 
   // Public routes handling
@@ -66,8 +63,8 @@ export async function middleware(request: NextRequest) {
         pathname,
         isLoggedIn,
         userRole,
-        userId: token?.id,
-        userName: token?.name,
+        userId: session?.user?.id,
+        userName: session?.user?.name,
         timestamp: new Date().toISOString()
       });
     }

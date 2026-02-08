@@ -109,6 +109,9 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+// Force Node.js runtime (NextAuth requires Node.js modules not available in Edge)
+export const runtime = 'nodejs';
+
 export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico).*)',

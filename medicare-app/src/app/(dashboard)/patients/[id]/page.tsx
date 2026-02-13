@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Edit, Calendar, Phone, MapPin, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { DeleteRecordDialog } from '@/components/medical-records/delete-record-dialog';
 import type { Student } from '@/types/student';
 import type { MedicalRecord } from '@/types/medical-record';
 
@@ -202,8 +203,15 @@ export default function IndividualPatientPage() {
                           <div className="font-semibold text-lg text-gray-800">
                             {record.chiefComplaint}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {new Date(record.visitDate).toLocaleDateString()}
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm text-gray-500">
+                              {new Date(record.visitDate).toLocaleDateString()}
+                            </div>
+                            <DeleteRecordDialog
+                              record={record}
+                              studentId={id}
+                              onDelete={fetchPatientDetails}
+                            />
                           </div>
                         </div>
                         <div className="space-y-2 text-sm">

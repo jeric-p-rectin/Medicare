@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Bell, Loader2, ClipboardCheck } from 'lucide-react';
+import { Bell, Loader2, ClipboardCheck, CheckCheck } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertCard } from '@/components/alerts/alert-card';
+import { DeleteAlertDialog } from '@/components/alerts/delete-alert-dialog';
 import { PendingActionList } from '@/components/pending-actions/pending-action-list';
 import { useAlerts } from '@/hooks/useAlerts';
 import { usePendingActions } from '@/hooks/usePendingActions';
@@ -19,12 +20,15 @@ export default function AlertsPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
+  const [deleteAlertId, setDeleteAlertId] = useState<string | null>(null);
 
   // Fetch all alerts (not just unread)
-  const { alerts, isLoading, markAsRead, dismissAlert } = useAlerts({
+  const { alerts, isLoading, markAsRead, resolveAlert, deleteAlert, markAllAsRead, unreadCount } = useAlerts({
     unreadOnly: false,
     refreshInterval: 5000, // Poll every 5 seconds for consistency
   });
+
+  const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
 
   // Fetch pending actions (only for SUPER_ADMIN)
   const {
@@ -77,6 +81,17 @@ export default function AlertsPage() {
     }
   };
 
+  const handleMarkAllAsRead = async () => {
+    try {
+      setIsMarkingAllRead(true);
+      await markAllAsRead();
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+    } finally {
+      setIsMarkingAllRead(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-8">
       {/* Header */}
@@ -93,8 +108,9 @@ export default function AlertsPage() {
 
       {/* Filter Tabs */}
       <div className="mb-6 border-b border-gray-200">
-        <div className="flex gap-1 overflow-x-auto pb-2">
-          {tabs.map((tab) => (
+        <div className="flex justify-between items-center pb-2 gap-4">
+          <div className="flex gap-1 overflow-x-auto">
+            {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveFilter(tab.id)}
@@ -122,7 +138,29 @@ export default function AlertsPage() {
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#C41E3A]" />
               )}
             </button>
-          ))}
+            ))}
+          </div>
+
+          {/* Mark All as Read Button - Only show when there are unread alerts and not on pending tab */}
+          {activeFilter !== 'pending' && unreadCount > 0 && (
+            <Button
+              onClick={handleMarkAllAsRead}
+              disabled={isMarkingAllRead}
+              className="bg-[#C41E3A] hover:bg-[#A01729] text-white flex items-center gap-2 whitespace-nowrap"
+            >
+              {isMarkingAllRead ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Marking...
+                </>
+              ) : (
+                <>
+                  <CheckCheck className="w-4 h-4" />
+                  Mark All as Read
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -177,14 +215,24 @@ export default function AlertsPage() {
                   key={alert.id}
                   alert={alert}
                   onMarkAsRead={markAsRead}
-                  onDismiss={dismissAlert}
+                  onResolve={resolveAlert}
+                  onDelete={(id) => setDeleteAlertId(id)}
                   onClick={() => router.push(`/alerts/${alert.id}`)}
+                  userRole={session?.user?.role}
                 />
               ))}
             </div>
           )}
         </>
       )}
+
+      {/* Delete confirmation dialog */}
+      <DeleteAlertDialog
+        alert={alerts.find(a => a.id === deleteAlertId)}
+        open={!!deleteAlertId}
+        onOpenChange={(open) => !open && setDeleteAlertId(null)}
+        onDelete={deleteAlert}
+      />
     </div>
   );
 }

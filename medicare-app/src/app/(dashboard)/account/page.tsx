@@ -10,6 +10,7 @@ import { ProfileForm } from '@/components/account/profile-form';
 import { PasswordForm } from '@/components/account/password-form';
 import { UserManagementTable } from '@/components/account/user-management-table';
 import { PatientInfoSection } from '@/components/account/patient-info-section';
+import { DiseaseThresholdTable } from '@/components/account/disease-threshold-table';
 import { Loader2 } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
@@ -96,6 +97,7 @@ export default function AccountPage() {
     { value: 'profile', label: 'Profile', show: true },
     { value: 'password', label: 'Password', show: true },
     { value: 'users', label: 'User Management', show: user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' },
+    { value: 'thresholds', label: 'Disease Thresholds', show: user.role === 'SUPER_ADMIN' },
     { value: 'medical', label: 'Medical Records', show: user.role === 'PATIENT' },
   ];
 
@@ -141,6 +143,13 @@ export default function AccountPage() {
           {(user.role === 'SUPER_ADMIN' || user.role === 'ADMIN') && (
             <TabsContent value="users" className="space-y-6">
               <UserManagementTable />
+            </TabsContent>
+          )}
+
+          {/* Disease Thresholds Tab (SUPER_ADMIN only) */}
+          {user.role === 'SUPER_ADMIN' && (
+            <TabsContent value="thresholds" className="space-y-6">
+              <DiseaseThresholdTable />
             </TabsContent>
           )}
 

@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Get all configured disease thresholds
-    const thresholds = getOutbreakThresholds();
+    const thresholds = await getOutbreakThresholds();
 
     // 3. Trigger outbreak check for each disease
     const results = [];

@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Trash2 } from 'lucide-react';
 import { AlertIcon } from './alert-icon';
 import type { Alert } from '@/types/alert';
 import { cn } from '@/lib/utils';
@@ -8,11 +9,13 @@ import { cn } from '@/lib/utils';
 interface AlertCardProps {
   alert: Alert;
   onMarkAsRead?: (id: string) => void;
-  onDismiss?: (id: string) => void;
+  onResolve?: (id: string) => void;  // Soft-delete (dismiss)
+  onDelete?: (id: string) => void;   // Hard-delete (permanent)
   onClick?: () => void;
+  userRole?: string;  // To show/hide delete button
 }
 
-export function AlertCard({ alert, onMarkAsRead, onDismiss, onClick }: AlertCardProps) {
+export function AlertCard({ alert, onMarkAsRead, onResolve, onDelete, onClick, userRole }: AlertCardProps) {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'CRITICAL':
@@ -102,17 +105,31 @@ export function AlertCard({ alert, onMarkAsRead, onDismiss, onClick }: AlertCard
                 Mark as Read
               </Button>
             )}
-            {onDismiss && (
+            {onResolve && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDismiss(alert.id);
+                  onResolve(alert.id);
                 }}
-                className="text-xs text-gray-500 hover:text-red-600"
+                className="text-xs text-gray-500 hover:text-gray-700"
               >
                 Dismiss
+              </Button>
+            )}
+            {onDelete && userRole === 'SUPER_ADMIN' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(alert.id);
+                }}
+                className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="w-3 h-3 mr-1" />
+                Delete
               </Button>
             )}
           </div>

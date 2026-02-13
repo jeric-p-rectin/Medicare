@@ -42,10 +42,13 @@ export function useAlerts(options: UseAlertsOptions = {}) {
     }
   };
 
-  const dismissAlert = async (alertId: string) => {
+  // Soft-delete (resolve/dismiss) - archives the alert
+  const resolveAlert = async (alertId: string, notes?: string) => {
     try {
-      const res = await fetch(`/api/alerts/${alertId}`, {
-        method: 'DELETE',
+      const res = await fetch(`/api/alerts/${alertId}/resolve`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resolutionNotes: notes }),
       });
 
       if (!res.ok) throw new Error('Failed to dismiss alert');
@@ -58,13 +61,51 @@ export function useAlerts(options: UseAlertsOptions = {}) {
     }
   };
 
+  // Hard-delete (permanent) - removes the alert from database
+  const deleteAlert = async (alertId: string) => {
+    try {
+      const res = await fetch(`/api/alerts/${alertId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to delete alert');
+      }
+
+      // Optimistically update the local data
+      mutate();
+    } catch (error) {
+      console.error('Error deleting alert:', error);
+      throw error;
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const res = await fetch('/api/alerts/mark-all-read', {
+        method: 'POST',
+      });
+
+      if (!res.ok) throw new Error('Failed to mark all alerts as read');
+
+      // Optimistically update the local data
+      mutate();
+    } catch (error) {
+      console.error('Error marking all alerts as read:', error);
+      throw error;
+    }
+  };
+
   return {
     alerts: data || [],
     error,
     isLoading,
     mutate,
     markAsRead,
-    dismissAlert,
+    resolveAlert,  // Soft-delete (dismiss)
+    deleteAlert,   // Hard-delete (permanent)
+    markAllAsRead,
     unreadCount: data?.filter(alert => !alert.isRead).length || 0,
   };
 }

@@ -1,34 +1,27 @@
 import { getDiseaseCount } from './queries/statistics';
 import { createAlert, outbreakAlertExists } from './queries/alerts';
+import { getActiveThresholds } from './queries/disease-thresholds';
 
 /**
- * Outbreak detection thresholds
+ * Outbreak detection thresholds interface (maintains compatibility)
  * When disease cases exceed these thresholds per week, an alert is triggered
  */
-interface OutbreakThreshold {
+export interface OutbreakThreshold {
   disease: string;
   casesPerWeek: number;
 }
-
-const OUTBREAK_THRESHOLDS: OutbreakThreshold[] = [
-  { disease: 'Flu', casesPerWeek: 5 },
-  { disease: 'Dengue', casesPerWeek: 3 },
-  { disease: 'COVID-19', casesPerWeek: 2 },
-  { disease: 'Headache', casesPerWeek: 10 },
-  { disease: 'Stomach Ache', casesPerWeek: 7 },
-  { disease: 'Fever', casesPerWeek: 8 },
-  { disease: 'Cough', casesPerWeek: 10 },
-  { disease: 'Diarrhea', casesPerWeek: 5 },
-];
 
 /**
  * Check if a disease has exceeded the outbreak threshold
  * This function should be called after creating a new medical record
  */
 export async function checkOutbreakThreshold(disease: string): Promise<void> {
-  // Find threshold for this disease
-  const threshold = OUTBREAK_THRESHOLDS.find(
-    (t) => t.disease.toLowerCase() === disease.toLowerCase()
+  // Fetch active thresholds from database
+  const thresholds = await getActiveThresholds();
+
+  // Find threshold for this disease (case-insensitive)
+  const threshold = thresholds.find(
+    (t) => t.diseaseName.toLowerCase() === disease.toLowerCase()
   );
 
   if (!threshold) {
@@ -60,7 +53,14 @@ export async function checkOutbreakThreshold(disease: string): Promise<void> {
 
 /**
  * Get all configured outbreak thresholds (for admin configuration UI)
+ * Returns in legacy format for backward compatibility
  */
-export function getOutbreakThresholds(): OutbreakThreshold[] {
-  return OUTBREAK_THRESHOLDS;
+export async function getOutbreakThresholds(): Promise<OutbreakThreshold[]> {
+  const thresholds = await getActiveThresholds();
+
+  // Convert to legacy format
+  return thresholds.map(t => ({
+    disease: t.diseaseName,
+    casesPerWeek: t.casesPerWeek
+  }));
 }

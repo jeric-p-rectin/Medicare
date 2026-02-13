@@ -1,4 +1,4 @@
-import { query, queryOne } from '../db';
+import { query, queryOne, execute } from '../db';
 import type { MedicalRecord, MedicalRecordCreateInput, MedicalRecordUpdateInput } from '@/types/medical-record';
 
 /**
@@ -149,4 +149,13 @@ export async function getMedicalRecordById(id: string): Promise<MedicalRecord | 
   `;
 
   return queryOne<MedicalRecord>(sql, [id]);
+}
+
+/**
+ * Delete a medical record by ID
+ * Note: Audit logging should be done in the API layer BEFORE calling this function
+ */
+export async function deleteMedicalRecord(id: string): Promise<void> {
+  const sql = 'DELETE FROM medical_records WHERE id = ?';
+  await execute(sql, [id]);
 }

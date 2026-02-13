@@ -24,7 +24,7 @@ export async function getUnreadAlerts(): Promise<Alert[]> {
       read_at as readAt,
       resolved_at as resolvedAt
     FROM alerts
-    WHERE is_read = FALSE
+    WHERE is_read = FALSE AND is_resolved = FALSE
     ORDER BY severity DESC, created_at DESC
   `;
 
@@ -34,7 +34,7 @@ export async function getUnreadAlerts(): Promise<Alert[]> {
 /**
  * Get all alerts (with optional filters)
  */
-export async function getAlerts(options?: { unread?: boolean; limit?: number }): Promise<Alert[]> {
+export async function getAlerts(options?: { unread?: boolean; limit?: number; includeResolved?: boolean }): Promise<Alert[]> {
   let sql = `
     SELECT
       id,
@@ -58,6 +58,12 @@ export async function getAlerts(options?: { unread?: boolean; limit?: number }):
 
   const whereClauses: string[] = [];
   const params: (string | number)[] = [];
+
+  // By default, exclude resolved alerts unless explicitly requested
+  if (!options?.includeResolved) {
+    whereClauses.push('is_resolved = ?');
+    params.push(0);  // Convert false → 0 for MySQL tinyint(1)
+  }
 
   if (options?.unread) {
     whereClauses.push('is_read = ?');
@@ -180,4 +186,19 @@ export async function trendAlertExists(disease: string, hoursAgo: number = 24): 
 
   const result = await query<{ count: number }>(sql, [disease, hoursAgo]);
   return (result[0]?.count || 0) > 0;
+}
+
+/**
+ * Mark all unread alerts as read for the current user
+ * Marks both global alerts (NULL recipient) and user-specific alerts
+ */
+export async function markAllAlertsAsRead(userId?: string): Promise<void> {
+  const sql = `
+    UPDATE alerts
+    SET is_read = TRUE, read_at = CURRENT_TIMESTAMP
+    WHERE is_read = FALSE
+    AND (recipient_user_id IS NULL OR recipient_user_id = ?)
+  `;
+
+  await execute(sql, [userId || null]);
 }

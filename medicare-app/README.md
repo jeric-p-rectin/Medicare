@@ -50,7 +50,7 @@ Run the setup script to apply the schema, seed data, and test data:
 node database/setup-database.js
 ```
 
-This creates the 8 core tables and seeds 24 academic sections (Grades 7–12, Sections A–D) plus a default `superadmin` user.
+This creates the 9 core tables and seeds 24 academic sections (Grades 7–12, Sections A–D) plus a default `superadmin` user and 8 default disease thresholds.
 
 ### 4. Run the development server
 
@@ -98,8 +98,52 @@ medicare-app/
 
 - **Student registration** with automatic duplicate detection
 - **Outbreak alert system** — disease-threshold monitoring with severity levels
+- **Disease threshold management** — SUPER_ADMIN can configure outbreak detection thresholds dynamically
 - **Role-based access control** — SUPER_ADMIN, ADMIN, PATIENT roles
 - **Pending approval workflow** — ADMIN actions require SUPER_ADMIN sign-off
 - **Audit logging** — compliance trail for all CRUD operations
 - **Medical records & statistics** — per-student records and grade-level dashboards
+- **Disease filtering & trend visualization** — 12-month histograms with month-over-month change tracking
 - **Patient self-service portal** — limited student-facing access
+
+## Recent Feature Additions
+
+### Disease Thresholds Management
+SUPER_ADMIN users can now dynamically configure outbreak detection thresholds via the Account page. The system supports:
+- Creating thresholds for new diseases
+- Editing threshold values and descriptions
+- Activating/deactivating thresholds without deletion
+- Automatic threshold creation when new diseases are recorded
+
+### Enhanced Statistics Dashboard
+The statistics page now includes:
+- Disease filtering with persistent selections (localStorage)
+- 12-month trend histograms for individual diseases
+- Month-over-month change indicators (% increase/decrease)
+- Time period selector (week/month/quarter/year)
+
+### Medical Records Management
+- Medical record deletion with audit trail logging
+- Confirmation dialogs with record preview before deletion
+- Role-based access (ADMIN/SUPER_ADMIN only)
+
+### Alert System Improvements
+- "Mark all as read" bulk operation for alerts
+- Dynamic threshold loading from database instead of hardcoded values
+- Automatic outbreak detection when medical records are created
+
+## Database Schema
+
+The application uses 9 core tables:
+
+| Table | Purpose |
+|-------|---------|
+| `users` | System users with role-based access |
+| `students` | Patient records linked to users |
+| `sections` | Academic sections (Grades 7–12, Sections A–D) |
+| `medical_records` | Health visit records with disease tracking |
+| `alerts` | System notifications and outbreak alerts |
+| `duplicate_detections` | Potential duplicate student detection |
+| `audit_logs` | Compliance trail for all operations |
+| `pending_actions` | Approval workflow for ADMIN requests |
+| `disease_thresholds` | Configurable outbreak detection thresholds |

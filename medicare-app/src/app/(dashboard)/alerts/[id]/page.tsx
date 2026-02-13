@@ -2,21 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, BarChart3, Users, CheckCircle, XCircle } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { ArrowLeft, BarChart3, Users, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertIcon } from '@/components/alerts/alert-icon';
+import { DeleteAlertDialog } from '@/components/alerts/delete-alert-dialog';
 import type { Alert } from '@/types/alert';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export default function AlertDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const { data: session } = useSession();
   const id = params.id as string;
 
   const [alert, setAlert] = useState<Alert | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -45,14 +50,42 @@ export default function AlertDetailPage() {
     }
   };
 
-  const handleDismiss = async () => {
+  // Soft-delete (resolve/dismiss)
+  const handleResolve = async () => {
     try {
-      const response = await fetch(`/api/alerts/${id}`, { method: 'DELETE' });
+      const response = await fetch(`/api/alerts/${id}/resolve`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resolutionNotes: undefined }),
+      });
+
       if (response.ok) {
+        toast.success('Alert dismissed successfully');
         router.push('/alerts');
+      } else {
+        throw new Error('Failed to dismiss alert');
       }
     } catch (error) {
       console.error('Error dismissing alert:', error);
+      toast.error('Failed to dismiss alert');
+    }
+  };
+
+  // Hard-delete (permanent)
+  const handleDelete = async (alertId: string) => {
+    try {
+      const response = await fetch(`/api/alerts/${alertId}`, { method: 'DELETE' });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete alert');
+      }
+
+      // No need to show success toast here - DeleteAlertDialog handles it
+      router.push('/alerts');
+    } catch (error) {
+      console.error('Error deleting alert:', error);
+      throw error; // Re-throw for DeleteAlertDialog to handle
     }
   };
 
@@ -179,7 +212,7 @@ export default function AlertDetailPage() {
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex gap-4">
+      <div className="flex gap-4 flex-wrap">
         {alert.alertType === 'OUTBREAK_SUSPECTED' && (
           <Button
             onClick={() => router.push('/statistics')}
@@ -200,14 +233,35 @@ export default function AlertDetailPage() {
           </Button>
         )}
 
+        {/* Dismiss button (soft-delete) */}
         <Button
           variant="outline"
-          onClick={handleDismiss}
-          className="border-2 border-gray-200 hover:border-red-500 hover:text-red-600"
+          onClick={handleResolve}
+          className="border-2 border-gray-200 hover:border-gray-300"
         >
           Dismiss Alert
         </Button>
+
+        {/* Delete button (hard-delete, SUPER_ADMIN only) */}
+        {session?.user?.role === 'SUPER_ADMIN' && (
+          <Button
+            variant="destructive"
+            onClick={() => setShowDeleteDialog(true)}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete Permanently
+          </Button>
+        )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <DeleteAlertDialog
+        alert={alert}
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }

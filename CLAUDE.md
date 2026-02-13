@@ -160,8 +160,9 @@ medicare-app/
 - `users.ts` - User authentication
 - `dashboard.ts` - Dashboard statistics queries
 - `pending-actions.ts` - Pending action database operations
+- `disease-thresholds.ts` - Disease threshold CRUD and auto-creation
 
-**Database Schema:** 8 core tables:
+**Database Schema:** 9 core tables:
 - `users` - System users with role-based access (SUPER_ADMIN, ADMIN, PATIENT)
 - `students` - Patient records linked to users (one-to-one)
 - `sections` - Academic sections (Grades 7-12, Sections A-D)
@@ -170,6 +171,7 @@ medicare-app/
 - `duplicate_detections` - Potential duplicate student records
 - `audit_logs` - Compliance tracking for all CRUD operations
 - `pending_actions` - Approval workflow for ADMIN requests
+- `disease_thresholds` - Dynamic outbreak detection thresholds (configurable per disease)
 
 ### Authentication & Authorization
 
@@ -258,6 +260,39 @@ medicare-app/
 - Delete functionality implemented (hard delete with cascade)
 - All destructive actions require SUPER_ADMIN approval
 
+#### 6. Disease Thresholds Management System (`src/lib/queries/disease-thresholds.ts`)
+
+**Purpose:** Dynamic configuration of outbreak detection thresholds via database instead of hardcoded values.
+
+**Database Table:** `disease_thresholds`
+- `id` (UUID) - Primary key
+- `disease_name` (VARCHAR 100, UNIQUE) - Disease identifier
+- `cases_per_week` (INT, CHECK > 0) - Alert trigger threshold
+- `description` (TEXT) - Optional administrative notes
+- `is_active` (BOOLEAN) - Soft enable/disable flag
+- `created_by_id`, `updated_by_id` - Audit trail
+- `created_at`, `updated_at` - Timestamps
+
+**Key Query Functions:**
+- `getActiveThresholds()` - Returns active thresholds for alert system
+- `getAllThresholds()` - Returns all thresholds for admin UI
+- `createThreshold(data)` - Create new threshold with audit logging
+- `updateThreshold(id, data)` - Partial updates with timestamp tracking
+- `deleteThreshold(id)` - Hard delete threshold
+- `ensureThresholdExists(name, userId)` - Auto-create default threshold (5 cases/week) for new diseases
+
+**Integration:**
+- Alert system (`src/lib/alert-system.ts`) now fetches thresholds dynamically instead of using hardcoded array
+- Medical record creation auto-creates missing thresholds via `ensureThresholdExists()`
+- SUPER_ADMIN can manage thresholds via Account page → "Disease Thresholds" tab
+
+**UI Components:**
+- `DiseaseThresholdTable` - CRUD interface for threshold management
+- `CreateThresholdDialog` - Modal with disease combobox and validation
+- `EditThresholdDialog` - Edit cases/week and description
+
+**Default Thresholds:** 8 diseases seeded (Flu: 5, Dengue: 3, COVID-19: 2, Headache: 10, Stomach Ache: 7, Fever: 8, Cough: 10, Diarrhea: 5)
+
 ### API Routes
 
 All API routes in `src/app/api/`:
@@ -277,6 +312,7 @@ All API routes in `src/app/api/`:
 - `DELETE /api/alerts/[id]` - Delete alert
 - `PUT /api/alerts/[id]/read` - Mark as read
 - `POST /api/alerts/trigger` - Manually trigger outbreak alert check
+- `POST /api/alerts/mark-all-read` - Mark all user's alerts as read (bulk operation)
 
 **Dashboard:**
 - `GET /api/dashboard/stats` - School-wide statistics
@@ -302,6 +338,15 @@ All API routes in `src/app/api/`:
 - `DELETE /api/users/[id]` - Delete user (hard delete with pending approval for ADMIN)
 - `PATCH /api/users/[id]/password` - Update user password
 
+**Disease Thresholds:**
+- `GET /api/disease-thresholds` - List all thresholds + existing diseases (SUPER_ADMIN only)
+- `POST /api/disease-thresholds` - Create threshold (SUPER_ADMIN only)
+- `PUT /api/disease-thresholds/[id]` - Update threshold (SUPER_ADMIN only)
+- `DELETE /api/disease-thresholds/[id]` - Delete threshold (SUPER_ADMIN only)
+
+**Medical Records:**
+- `DELETE /api/students/[id]/records/[recordId]` - Delete medical record with audit trail (ADMIN/SUPER_ADMIN)
+
 **Sections & Categories:**
 - `GET /api/sections` - List academic sections
 - `GET /api/disease-categories` - List disease categories
@@ -320,6 +365,7 @@ All API routes in `src/app/api/`:
 - `useAlerts()` - Alert fetching with SWR, returns: `{ alerts, error, isLoading, unreadCount, markAsRead(), dismissAlert() }`
 - `usePendingActions()` - Pending actions with SWR, returns: `{ pendingActions, pendingCount, isLoading, approvePendingAction(), rejectPendingAction(), cancelPendingAction() }`
 - `useSections()` - Fetches academic sections/grades via SWR
+- `useDiseaseFilters()` - Disease filter state with localStorage persistence, returns: `{ selectedDiseases, searchQuery, debouncedSearch, filteredDiseases, selectAll(), clearAll(), toggleDisease() }`
 - `use-scroll-animation` - Scroll-triggered animation state for landing page sections
 
 **Layout Components:**
@@ -334,12 +380,22 @@ All API routes in `src/app/api/`:
 - `create-user-dialog.tsx` - Modal for creating new users
 - `account-info-card.tsx` - Read-only account info display
 - `patient-info-section.tsx` - Patient-specific info within account page
+- `disease-threshold-table.tsx` - Threshold CRUD table (SUPER_ADMIN only)
+- `create-threshold-dialog.tsx` - Create new threshold modal with disease combobox
+- `edit-threshold-dialog.tsx` - Edit threshold configuration modal
 
 **Pending Actions Components** (`src/components/pending-actions/`):
 - `pending-action-list.tsx` - List of pending approval requests
 - `pending-action-card.tsx` - Individual action card
 - `approve-action-modal.tsx` - Confirmation modal for approval
 - `action-status-badge.tsx` - Status indicator badge
+
+**Medical Records Components** (`src/components/medical-records/`):
+- `delete-record-dialog.tsx` - Confirmation dialog for medical record deletion with preview
+
+**Statistics Components** (`src/components/statistics/`):
+- `disease-filter-card.tsx` - Disease selection filter with search and select all/clear
+- `disease-histogram.tsx` - 12-month bar chart for individual disease trends with change badges
 
 **Animation Components** (`src/components/animations/`):
 - `ParticleBackground.tsx` - Animated particle backdrop (landing page)
@@ -458,6 +514,8 @@ const { data, error, mutate } = useSWR(
 - `src/lib/duplicate-detection.ts` - Duplicate matching
 - `src/lib/pending-action-executor.ts` - Approval workflow execution
 - `src/lib/queries/pending-actions.ts` - Pending action database operations
+- `src/lib/queries/disease-thresholds.ts` - Disease threshold database operations
+- `src/hooks/useDiseaseFilters.ts` - Disease filter state management with localStorage
 - `src/middleware.ts` - Route protection
 
 **Main Pages:**
@@ -471,6 +529,6 @@ const { data, error, mutate } = useSWR(
 - `src/app/(dashboard)/alerts/page.tsx` - Alert management
 - `src/app/(dashboard)/alerts/[id]/page.tsx` - Alert detail view
 - `src/app/(dashboard)/account/page.tsx` - Account & user management
-- `src/app/(dashboard)/statistics/page.tsx` - Statistics dashboard
+- `src/app/(dashboard)/statistics/page.tsx` - Statistics dashboard with disease filtering and trend histograms
 - `src/app/(auth)/login/page.tsx` - Login page
 - `src/app/patient-portal/page.tsx` - Patient self-service portal

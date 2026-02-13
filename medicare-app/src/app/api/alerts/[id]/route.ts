@@ -17,9 +17,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only SUPER_ADMIN and ADMIN can delete alerts
-    if (session.user.role !== 'SUPER_ADMIN' && session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    // Only SUPER_ADMIN can permanently delete alerts
+    if (session.user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({
+        error: 'Only Super Admins can permanently delete alerts'
+      }, { status: 403 });
     }
 
     const { id } = await params;

@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DiseaseHistogram } from '@/components/statistics/disease-histogram';
+import { DiseaseFilterCard } from '@/components/statistics/disease-filter-card';
+import { useDiseaseFilters } from '@/hooks/useDiseaseFilters';
 import {
   Select,
   SelectContent,
@@ -36,6 +38,38 @@ export default function StatisticsDashboard() {
   const [loading, setLoading] = useState(true);
   const [trendData, setTrendData] = useState<DiseaseTrendsResponse | null>(null);
   const [trendsLoading, setTrendsLoading] = useState(true);
+
+  // Get available diseases from trend data
+  const availableDiseases = useMemo(() => {
+    return trendData?.trends.map(t => t.disease) || [];
+  }, [trendData]);
+
+  // Disease filter state
+  const {
+    selectedDiseases,
+    setSelectedDiseases,
+    searchQuery,
+    setSearchQuery,
+    filteredDiseases,
+    selectAll,
+    clearAll,
+    toggleDisease,
+  } = useDiseaseFilters(availableDiseases);
+
+  // Calculate visible trends based on filter
+  const visibleTrends = useMemo(() => {
+    if (!trendData) return [];
+
+    // If no diseases selected, show all
+    if (selectedDiseases.size === 0) {
+      return trendData.trends;
+    }
+
+    // Filter to selected diseases only
+    return trendData.trends.filter(entry =>
+      selectedDiseases.has(entry.disease)
+    );
+  }, [trendData, selectedDiseases]);
 
   useEffect(() => {
     fetchStatistics();
@@ -246,11 +280,37 @@ export default function StatisticsDashboard() {
             <Loader2 className="w-8 h-8 animate-spin text-[#C41E3A]" />
           </div>
         ) : trendData && trendData.trends.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {trendData.trends.map((entry, index) => (
-              <DiseaseHistogram key={entry.disease} entry={entry} colorIndex={index} />
-            ))}
-          </div>
+          <>
+            {/* Filter Card */}
+            <DiseaseFilterCard
+              trends={trendData.trends}
+              selectedDiseases={selectedDiseases}
+              onSelectionChange={setSelectedDiseases}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              filteredDiseases={filteredDiseases}
+              onSelectAll={selectAll}
+              onClearAll={clearAll}
+              onToggleDisease={toggleDisease}
+            />
+
+            {/* Histogram Grid */}
+            {visibleTrends.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {visibleTrends.map((entry, index) => (
+                  <DiseaseHistogram key={entry.disease} entry={entry} colorIndex={index} />
+                ))}
+              </div>
+            ) : (
+              <Card className="bg-white rounded-2xl shadow-lg">
+                <CardContent className="py-8">
+                  <div className="text-center text-gray-500">
+                    <p className="text-sm">No diseases selected. Use the filter above to select diseases to view.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
         ) : (
           <Card className="bg-white rounded-2xl shadow-lg">
             <CardContent className="py-8">

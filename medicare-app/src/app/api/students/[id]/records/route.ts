@@ -4,6 +4,7 @@ import { getStudentMedicalRecords, createMedicalRecord } from '@/lib/queries/med
 import { checkOutbreakThreshold } from '@/lib/alert-system';
 import { checkDiseaseTrend } from '@/lib/disease-trend';
 import { logAction } from '@/lib/audit-logger';
+import { ensureThresholdExists } from '@/lib/queries/disease-thresholds';
 
 /**
  * GET /api/students/[id]/records
@@ -74,6 +75,10 @@ export async function POST(
 
     // Check for outbreak if disease category is specified
     if (data.diseaseCategory) {
+      // Ensure threshold exists (auto-create if needed)
+      await ensureThresholdExists(data.diseaseCategory, session.user.id!);
+
+      // Now outbreak check will always have a threshold to use
       await checkOutbreakThreshold(data.diseaseCategory);
       await checkDiseaseTrend(data.diseaseCategory);
     }

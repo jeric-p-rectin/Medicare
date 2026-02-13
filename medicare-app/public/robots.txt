@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /logo.png
+Disallow: /dashboard
+Disallow: /login
+Disallow: /patient-portal
+Disallow: /registration
+Disallow: /patients
+Disallow: /alerts
+Disallow: /statistics
+Disallow: /account
+Disallow: /api/
+
+Sitemap: https://medalertportal.com/sitemap.xml

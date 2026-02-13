@@ -34,8 +34,14 @@ export function DeleteRecordDialog({ record, studentId, onDelete }: DeleteRecord
       );
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete medical record');
+        let errorMessage = 'Failed to delete medical record';
+        try {
+          const error = await response.json();
+          errorMessage = error.error || errorMessage;
+        } catch {
+          // Response wasn't JSON (e.g., HTML 404 page)
+        }
+        throw new Error(errorMessage);
       }
 
       toast.success('Medical record deleted successfully');

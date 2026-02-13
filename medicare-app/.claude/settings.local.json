@@ -12,7 +12,9 @@
       "Bash(node -e:*)",
       "Bash(dir:*)",
       "mcp__next-devtools__nextjs_index",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(claude mcp tool list:*)",
+      "Bash(npx -y @modelcontextprotocol/server-mysql query:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

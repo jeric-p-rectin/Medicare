@@ -16,13 +16,13 @@ SET @day5 = DATE_SUB(@today, INTERVAL 5 DAY);
 SET @day6 = DATE_SUB(@today, INTERVAL 6 DAY);
 
 -- Insert records for each disease
--- Chicken pox (4 records)
+-- Chicken Pox (4 records)
 INSERT INTO medical_records (id, student_id, visit_date, chief_complaint, diagnosis, disease_category, severity, recorded_by_id)
 VALUES
-  (UUID(), @student_id, @day1, 'Itchy rash and blisters', 'Chicken pox', 'Chicken pox', 'MODERATE', @admin_id),
-  (UUID(), @student_id, @day2, 'Red spots on skin', 'Chicken pox', 'Chicken pox', 'MILD', @admin_id),
-  (UUID(), @student_id, @day3, 'Fever with rash', 'Chicken pox', 'Chicken pox', 'MODERATE', @admin_id),
-  (UUID(), @student_id, @day4, 'Blisters and itching', 'Chicken pox', 'Chicken pox', 'MILD', @admin_id);
+  (UUID(), @student_id, @day1, 'Itchy rash and blisters', 'Chicken Pox', 'Chicken Pox', 'MODERATE', @admin_id),
+  (UUID(), @student_id, @day2, 'Red spots on skin', 'Chicken Pox', 'Chicken Pox', 'MILD', @admin_id),
+  (UUID(), @student_id, @day3, 'Fever with rash', 'Chicken Pox', 'Chicken Pox', 'MODERATE', @admin_id),
+  (UUID(), @student_id, @day4, 'Blisters and itching', 'Chicken Pox', 'Chicken Pox', 'MILD', @admin_id);
 
 -- Cough (9 records)
 INSERT INTO medical_records (id, student_id, visit_date, chief_complaint, diagnosis, disease_category, severity, recorded_by_id)

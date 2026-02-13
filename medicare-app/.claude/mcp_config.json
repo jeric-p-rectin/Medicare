@@ -1,0 +1,13 @@
+                                                                                                                                          {                                                                                                                                          "mcpServers": {                                                                                                                            "mysql": {                                                                                                                                 "command": "npx",                                                                                                                        "args": ["-y", "@modelcontextprotocol/server-mysql"],                                                                            
+        "env": {
+          "MYSQL_HOST": "mysql-1fcbd8e2-jerixmodz-8dd3.f.aivencloud.com",
+          "MYSQL_PORT": "19342",
+          "MYSQL_USER": "avnadmin",
+          "MYSQL_PASSWORD": "AVNS_H4u9xhXtXzXZBwOLgKw",
+          "MYSQL_DATABASE": "defaultdb",
+          "MYSQL_SSL": "true",
+          "MYSQL_SSL_REJECT_UNAUTHORIZED": "false"
+        }
+      }
+    }
+  }

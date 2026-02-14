@@ -13,7 +13,6 @@ export function TrendAlertPopup() {
   const { alerts, markAsRead } = useAlerts({ unreadOnly: true, refreshInterval: 5000 });
   const [visibleAlert, setVisibleAlert] = useState<Alert | null>(null);
   const shownAlertIds = useRef<Set<string>>(new Set());
-  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // --- pick the first unseen DISEASE_TREND alert ---
   const getNextTrendAlert = useCallback((): Alert | null => {
@@ -38,26 +37,8 @@ export function TrendAlertPopup() {
     }
   }, [alerts, visibleAlert, getNextTrendAlert]);
 
-  // --- auto-dismiss after 10 seconds ---
-  useEffect(() => {
-    if (!visibleAlert) return;
-
-    dismissTimerRef.current = setTimeout(() => {
-      handleDismiss();
-    }, 10000);
-
-    return () => {
-      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleAlert]);
-
   const handleDismiss = useCallback(async () => {
     if (!visibleAlert) return;
-    if (dismissTimerRef.current) {
-      clearTimeout(dismissTimerRef.current);
-      dismissTimerRef.current = null;
-    }
     // Mark as read in the DB (fire-and-forget is fine; the next poll will reflect it)
     markAsRead(visibleAlert.id).catch(() => {});
     setVisibleAlert(null);
@@ -138,10 +119,6 @@ export function TrendAlertPopup() {
             </Button>
           </div>
 
-          {/* Auto-dismiss progress hint */}
-          <p className="text-xs text-gray-400 text-center mt-3">
-            Auto-dismissing in 10 seconds
-          </p>
         </div>
       </div>
     </>

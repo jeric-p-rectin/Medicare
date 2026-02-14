@@ -102,9 +102,9 @@ export function DiseaseThresholdTable() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Disease Outbreak Thresholds</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Disease Alert Thresholds</h2>
           <p className="text-sm text-gray-500 mt-1">
-            Configure outbreak detection thresholds for automatic alert generation
+            Configure alert detection thresholds for automatic alert generation
           </p>
         </div>
         <Button
@@ -112,7 +112,7 @@ export function DiseaseThresholdTable() {
           className="bg-gradient-to-r from-[#C41E3A] to-[#E63946] text-white"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Add Threshold
+          Add Alert Threshold
         </Button>
       </div>
 
@@ -132,7 +132,7 @@ export function DiseaseThresholdTable() {
             {thresholds.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-gray-500 py-8">
-                  No disease thresholds configured
+                  No disease alert thresholds configured
                 </TableCell>
               </TableRow>
             ) : (

@@ -99,7 +99,7 @@ export function CreateThresholdDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Disease Threshold</DialogTitle>
+          <DialogTitle>Add Disease Alert Threshold</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -224,7 +224,7 @@ export function CreateThresholdDialog({
                   Creating...
                 </>
               ) : (
-                'Create Threshold'
+                'Create Alert Threshold'
               )}
             </Button>
           </div>

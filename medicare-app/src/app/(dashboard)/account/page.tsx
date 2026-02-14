@@ -97,7 +97,7 @@ export default function AccountPage() {
     { value: 'profile', label: 'Profile', show: true },
     { value: 'password', label: 'Password', show: true },
     { value: 'users', label: 'User Management', show: user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' },
-    { value: 'thresholds', label: 'Disease Thresholds', show: user.role === 'SUPER_ADMIN' },
+    { value: 'thresholds', label: 'Disease Alert Thresholds', show: user.role === 'SUPER_ADMIN' },
     { value: 'medical', label: 'Medical Records', show: user.role === 'PATIENT' },
   ];
 
@@ -146,7 +146,7 @@ export default function AccountPage() {
             </TabsContent>
           )}
 
-          {/* Disease Thresholds Tab (SUPER_ADMIN only) */}
+          {/* Disease Alert Thresholds Tab (SUPER_ADMIN only) */}
           {user.role === 'SUPER_ADMIN' && (
             <TabsContent value="thresholds" className="space-y-6">
               <DiseaseThresholdTable />

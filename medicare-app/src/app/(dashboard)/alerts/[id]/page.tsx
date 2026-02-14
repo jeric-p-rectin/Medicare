@@ -245,9 +245,8 @@ export default function AlertDetailPage() {
         {/* Delete button (hard-delete, SUPER_ADMIN only) */}
         {session?.user?.role === 'SUPER_ADMIN' && (
           <Button
-            variant="destructive"
             onClick={() => setShowDeleteDialog(true)}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-gradient-to-r from-[#C41E3A] to-[#E63946] text-white rounded-xl shadow-lg hover:shadow-xl transition-all"
           >
             <Trash2 className="w-4 h-4 mr-2" />
             Delete Permanently

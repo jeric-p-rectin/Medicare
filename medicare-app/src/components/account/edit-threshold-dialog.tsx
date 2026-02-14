@@ -67,7 +67,7 @@ export function EditThresholdDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Threshold: {threshold.diseaseName}</DialogTitle>
+          <DialogTitle>Edit Alert Threshold: {threshold.diseaseName}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

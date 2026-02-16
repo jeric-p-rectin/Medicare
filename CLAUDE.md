@@ -36,6 +36,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Tailwind:** Use utility classes for layout and spacing. Avoid custom CSS files unless absolutely necessary.
 - **Lucide Icons:** Use `lucide-react` for icons as per standard shadcn setup.
 
+### 4. Security & User Management
+- **SUPER_ADMIN Privileges:** Only SUPER_ADMIN can create users (including other SUPER_ADMIN accounts)
+- **User Creation Audit Trail:** All user creation operations are logged in `audit_logs` table with:
+  - Creator ID and name
+  - Created user details (username, email, role)
+  - Enhanced logging for SUPER_ADMIN account creation
+  - IP address and timestamp
+- **Visual Warnings:** UI displays ⚠️ warning indicator when creating SUPER_ADMIN accounts to emphasize elevated privileges
+
 ## Common Commands
 - **Add Component:** `npx shadcn@latest add`
 - **Database Check:** (Ask Claude) "Inspect schema for [table_name]"
@@ -169,7 +178,7 @@ medicare-app/
 - `medical_records` - Health visit records with disease tracking
 - `alerts` - System notifications (outbreak alerts, duplicate detection)
 - `duplicate_detections` - Potential duplicate student records
-- `audit_logs` - Compliance tracking for all CRUD operations
+- `audit_logs` - Compliance tracking for all CRUD operations, including user creation with enhanced logging for SUPER_ADMIN account creation
 - `pending_actions` - Approval workflow for ADMIN requests
 - `disease_thresholds` - Dynamic outbreak detection thresholds (configurable per disease)
 
@@ -237,7 +246,10 @@ medicare-app/
   - Student registrations (POST /api/students)
   - User deactivation (PATCH /api/users/[id])
   - User deletion (DELETE /api/users/[id])
-- **SUPER_ADMIN Role:** Can perform all actions directly without approval
+  - **Note:** ADMINs cannot create users - only SUPER_ADMIN can create users of any type
+- **SUPER_ADMIN Role:** Can perform all actions directly without approval, including:
+  - Creating any user type (PATIENT, ADMIN, or SUPER_ADMIN)
+  - Immediate execution of all restricted operations
 
 **Pending Actions Table:**
 - Stores action type, requester details, target user, status (PENDING/APPROVED/REJECTED)

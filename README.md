@@ -10,7 +10,10 @@ A comprehensive Next.js web application for managing high school clinic operatio
 - **Outbreak Detection**: Automated disease outbreak monitoring with configurable thresholds
 - **Alert System**: Real-time notifications for outbreaks and duplicate records
 - **Statistics Dashboard**: Visual analytics for disease trends and patient demographics
-- **Role-Based Access Control**: Three-tier permission system (SUPER_ADMIN, ADMIN, PATIENT)
+- **Role-Based Access Control**: Three-tier permission system
+  - **SUPER_ADMIN:** Full system access, including creating other SUPER_ADMIN accounts
+  - **ADMIN:** Clinic staff operations (requires approval for user management actions)
+  - **PATIENT:** Limited student self-service access
 
 ### New: Permission & Approval System 🆕
 - **Admin Approval Workflow**: ADMIN users must request SUPER_ADMIN approval for:
@@ -229,6 +232,12 @@ Stores approval requests with:
 - Role-based route protection
 - CSRF protection via NextAuth
 - Approval workflow for sensitive operations
+- **User Creation Audit Logging:** All user creation operations logged with:
+  - Creator identity and IP address
+  - Created user details (username, email, role)
+  - Enhanced logging for SUPER_ADMIN account creation
+- **Visual Permission Warnings:** UI clearly indicates when granting elevated privileges (⚠️ indicator)
+- **Role Hierarchy Enforcement:** Only SUPER_ADMIN can create other SUPER_ADMIN accounts
 
 ## 📱 API Endpoints
 

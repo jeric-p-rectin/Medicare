@@ -44,7 +44,7 @@ export const userCreateSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50, 'First name must be 50 characters or less'),
   lastName: z.string().min(1, 'Last name is required').max(50, 'Last name must be 50 characters or less'),
   middleName: z.string().max(50, 'Middle name must be 50 characters or less').optional(),
-  role: z.enum(['ADMIN', 'PATIENT']),
+  role: z.enum(['SUPER_ADMIN', 'ADMIN', 'PATIENT']),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 

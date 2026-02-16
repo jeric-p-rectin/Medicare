@@ -208,7 +208,7 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
               </div>
             </div>
 
-            <div className="flex justify-end pt-4">
+            <div className="px-8 py-3 bg-gradient-to-r from-[#C41E3A] to-[#E63946] text-white rounded-xl font-semibold shadow-lg shadow-red-500/30 hover:shadow-xl transition-all disabled:opacity-50">
               <Button onClick={handleClose}>Done</Button>
             </div>
           </div>
@@ -281,6 +281,9 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
               >
                 <option value="PATIENT">Patient</option>
                 <option value="ADMIN">Admin</option>
+                <option value="SUPER_ADMIN" className="font-semibold text-red-600">
+                  ⚠️ Super Admin (Full System Access)
+                </option>
               </select>
               {errors.role && (
                 <p className="text-sm text-red-500 mt-1">{errors.role.message}</p>

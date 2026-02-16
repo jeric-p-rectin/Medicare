@@ -4,6 +4,7 @@ import { getAllUsers, createUser, usernameExists, emailExists } from '@/lib/quer
 import { userCreateSchema } from '@/lib/validations/account';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
+import { logAction } from '@/lib/audit-logger';
 
 /**
  * GET /api/users
@@ -126,6 +127,41 @@ export async function POST(request: NextRequest) {
       lastName: validatedData.lastName,
       middleName: validatedData.middleName || undefined,
     });
+
+    // Log user creation for compliance audit trail
+    await logAction(
+      session.user.id,
+      'CREATE',
+      'users',
+      userId,
+      null, // no old value for new records
+      {
+        username: validatedData.username,
+        email: validatedData.email,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        role: validatedData.role,
+      },
+      request
+    );
+
+    // Additional security logging for SUPER_ADMIN creation
+    if (validatedData.role === 'SUPER_ADMIN') {
+      await logAction(
+        session.user.id,
+        'CREATE',
+        'users',
+        userId,
+        null,
+        {
+          warning: 'SUPER_ADMIN account created',
+          createdBy: `${session.user.name} (${session.user.id})`,
+          newSuperAdminUsername: validatedData.username,
+          timestamp: new Date().toISOString()
+        },
+        request
+      );
+    }
 
     return NextResponse.json({
       message: 'User created successfully',

@@ -151,7 +151,7 @@ export function Demo() {
                 ⚠
               </div>
               <span className="font-semibold text-medicare-dark-gray whitespace-nowrap">
-                Disease Outbreak Alert
+                Disease Trend Alert
               </span>
             </div>
 

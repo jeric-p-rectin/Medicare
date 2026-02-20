@@ -16,7 +16,9 @@
       "mcp__mysql__mysql_query",
       "Bash(tasklist:*)",
       "Bash(findstr:*)",
-      "Bash(taskkill //F //PID 1132)"
+      "Bash(taskkill //F //PID 1132)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 const alerts = [
   {
     icon: '🦠',
-    title: 'Outbreak Alert: Flu Cases Rising',
+    title: 'Disease Trend Alert: Flu Cases Rising',
     message: '7 flu cases detected this week (threshold: 5 cases)',
     time: '2 hours ago',
     borderColor: '#E63946',
@@ -56,7 +56,7 @@ export function Alerts() {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             )}
           >
-            Real-time outbreak detection, duplicate prevention, and instant notifications
+            Real-time disease trend detection, duplicate prevention, and instant notifications
           </p>
         </div>
 

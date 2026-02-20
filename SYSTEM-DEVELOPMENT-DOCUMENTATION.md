@@ -610,7 +610,7 @@ If exceeded → Create Alert → Notify admins
 3. **Admin clicks notification icon**
    - Dropdown shows recent alerts
    - Each alert shows:
-     - Disease name (e.g., "Flu Outbreak Alert")
+     - Disease name (e.g., "Flu Disease Trend Alert")
      - Severity level (HIGH or CRITICAL)
      - Time created (e.g., "2 hours ago")
 

@@ -60,7 +60,7 @@ export default function AlertsPage() {
   const tabs: { id: FilterTab; label: string; show?: boolean }[] = [
     { id: 'all' as FilterTab, label: 'All' },
     { id: 'unread' as FilterTab, label: 'Unread' },
-    { id: 'outbreak' as FilterTab, label: 'Outbreak' },
+    { id: 'outbreak' as FilterTab, label: 'Disease Trend' },
     { id: 'duplicate' as FilterTab, label: 'Duplicate' },
     { id: 'pending' as FilterTab, label: 'Pending Approvals', show: isSuperAdmin },
   ].filter((tab) => tab.show !== false);
@@ -102,7 +102,7 @@ export default function AlertsPage() {
         <p className="text-gray-600">
           {activeFilter === 'pending'
             ? 'Review and approve requests from ADMIN users'
-            : 'Manage outbreak notifications and duplicate detection alerts'}
+            : 'Manage disease trend notifications and duplicate detection alerts'}
         </p>
       </div>
 
@@ -201,7 +201,7 @@ export default function AlertsPage() {
                   {activeFilter === 'unread'
                     ? "You're all caught up! No unread alerts at the moment."
                     : activeFilter === 'outbreak'
-                    ? 'No outbreak alerts detected. The system is monitoring for disease patterns.'
+                    ? 'No disease trend alerts detected. The system is monitoring for disease patterns.'
                     : activeFilter === 'duplicate'
                     ? 'No duplicate students detected during registration.'
                     : 'No alerts in the system yet.'}

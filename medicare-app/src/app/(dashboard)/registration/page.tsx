@@ -327,7 +327,7 @@ export default function RegistrationPage() {
                             <SelectValue placeholder="Select Grade" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Non-Graded">Special Education (Non-Graded)</SelectItem>
+                            <SelectItem value="Non-Graded">SNED (Non-Graded)</SelectItem>
                             <SelectItem value="7">Grade 7</SelectItem>
                             <SelectItem value="8">Grade 8</SelectItem>
                             <SelectItem value="9">Grade 9</SelectItem>

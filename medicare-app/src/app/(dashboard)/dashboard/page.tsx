@@ -109,7 +109,7 @@ export default function SchoolWideDashboard() {
             <div className="w-20 h-20 mx-auto mb-4 rounded-full
                         bg-gradient-to-r from-[#C41E3A] to-[#E63946]
                         flex items-center justify-center shadow-lg shadow-red-500/30">
-              <span className="text-2xl font-bold text-white">SPED</span>
+              <span className="text-2xl font-bold text-white">SNED</span>
             </div>
             <div className="text-3xl font-bold text-gray-800 mb-1">
               {getSpecialEdCount()}

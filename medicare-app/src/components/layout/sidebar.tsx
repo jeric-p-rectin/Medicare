@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   X,
+  FileText,
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,7 @@ type NavItem = {
 const allNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['SUPER_ADMIN', 'ADMIN', 'PATIENT'] },
   { href: '/patients', label: 'Patients', icon: Users, roles: ['SUPER_ADMIN', 'ADMIN'] },
+  { href: '/medical-records', label: 'Medical Records', icon: FileText, roles: ['SUPER_ADMIN', 'ADMIN'] },
   { href: '/registration', label: 'Registration', icon: UserPlus, roles: ['SUPER_ADMIN', 'ADMIN'] },
   { href: '/statistics', label: 'Statistics', icon: BarChart3, roles: ['SUPER_ADMIN', 'ADMIN'] },
   { href: '/account', label: 'Account', icon: Settings, roles: ['SUPER_ADMIN', 'ADMIN', 'PATIENT'] },

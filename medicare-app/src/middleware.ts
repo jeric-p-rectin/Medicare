@@ -91,7 +91,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Admin-only routes (block patients)
-  const adminOnlyRoutes = ['/patients', '/registration', '/statistics', '/alerts'];
+  const adminOnlyRoutes = ['/patients', '/registration', '/statistics', '/alerts', '/medical-records'];
   const isAdminRoute = adminOnlyRoutes.some(route => pathname.startsWith(route));
 
   if (isAdminRoute && userRole === 'PATIENT') {

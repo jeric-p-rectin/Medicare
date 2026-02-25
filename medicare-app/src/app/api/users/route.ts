@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     // Filter by status if provided
     if (status) {
       const isActive = status === 'active';
-      users = users.filter((user) => user.is_active === isActive);
+      users = users.filter((user) => !!user.is_active === isActive);
     }
 
     // Filter by search term if provided (search in name, username, email)

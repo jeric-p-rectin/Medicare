@@ -42,11 +42,37 @@ export interface MedicalRecordCreateInput {
 export interface MedicalRecordUpdateInput {
   visitDate?: Date;
   chiefComplaint?: string;
-  diagnosis?: string;
-  treatment?: string;
-  notes?: string;
-  diseaseCategory?: string;
-  illnessType?: string;
+  diagnosis?: string | null;
+  treatment?: string | null;
+  notes?: string | null;
+  diseaseCategory?: string | null;
+  illnessType?: string | null;
   severity?: Severity;
   isOutbreakRelated?: boolean;
+}
+
+export interface MedicalRecordWithStudent extends MedicalRecord {
+  studentName: string;   // "Dela Cruz, Juan M"
+  gradeLevel: string;
+  section: string;
+}
+
+export interface MedicalRecordListOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+  grade?: string;
+  section?: string;
+  diseaseCategory?: string;
+  severity?: Severity;
+  dateFrom?: string;  // YYYY-MM-DD
+  dateTo?: string;    // YYYY-MM-DD
+}
+
+export interface MedicalRecordListResult {
+  records: MedicalRecordWithStudent[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }

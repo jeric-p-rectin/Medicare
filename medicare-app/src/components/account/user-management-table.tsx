@@ -17,8 +17,10 @@ import {
 } from '@/components/ui/table';
 import { CreateUserDialog } from './create-user-dialog';
 import { toast } from 'sonner';
-import { Search, Plus, Loader2 } from 'lucide-react';
+import { Search, Plus, Loader2, X } from 'lucide-react';
 import { format } from 'date-fns';
+
+const ITEMS_PER_PAGE = 10;
 
 export function UserManagementTable() {
   const [users, setUsers] = useState<User[]>([]);
@@ -27,6 +29,7 @@ export function UserManagementTable() {
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [page, setPage] = useState(1);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -44,6 +47,7 @@ export function UserManagementTable() {
       }
 
       setUsers(result.users);
+      setPage(1);
     } catch (error: unknown) {
       const message = isErrorWithMessage(error) ? error.message : 'Failed to fetch users';
       toast.error(message);
@@ -54,10 +58,12 @@ export function UserManagementTable() {
 
   useEffect(() => {
     fetchUsers();
-  }, [roleFilter, statusFilter]);
+  }, [roleFilter, statusFilter, search]);
 
-  const handleSearch = () => {
-    fetchUsers();
+  const handleClearFilters = () => {
+    setSearch('');
+    setRoleFilter('');
+    setStatusFilter('');
   };
 
   const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
@@ -146,6 +152,9 @@ export function UserManagementTable() {
     }
   };
 
+  const totalPages = Math.ceil(users.length / ITEMS_PER_PAGE);
+  const paginatedUsers = users.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
   return (
     <div className="bg-white rounded-2xl shadow-lg shadow-red-500/5 p-6">
       <div className="flex justify-between items-center mb-6">
@@ -159,27 +168,29 @@ export function UserManagementTable() {
         </Button>
       </div>
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {/* Search */}
-        <div className="relative md:col-span-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search by name, username, or email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="pl-10"
-          />
-        </div>
+      {/* Search bar */}
+      <div className="mb-4 relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Input
+          type="text"
+          placeholder="Search by name, username, or email..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-11 pr-4 py-3 bg-white border-2 border-gray-100 rounded-xl
+                     focus:border-[#C41E3A] focus:ring-4 focus:ring-red-50
+                     transition-all outline-none shadow-sm"
+        />
+      </div>
 
+      {/* Filter row */}
+      <div className="mb-6 flex gap-4 items-center flex-wrap">
         {/* Role Filter */}
-        <div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">Role:</span>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl focus:border-[#C41E3A] focus:ring-4 focus:ring-red-50 transition-all outline-none"
+            className="px-4 py-2.5 bg-white border-2 border-gray-100 rounded-xl focus:border-[#C41E3A] focus:ring-4 focus:ring-red-50 transition-all outline-none text-sm"
           >
             <option value="">All Roles</option>
             <option value="SUPER_ADMIN">Super Admin</option>
@@ -189,17 +200,32 @@ export function UserManagementTable() {
         </div>
 
         {/* Status Filter */}
-        <div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">Status:</span>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl focus:border-[#C41E3A] focus:ring-4 focus:ring-red-50 transition-all outline-none"
+            className="px-4 py-2.5 bg-white border-2 border-gray-100 rounded-xl focus:border-[#C41E3A] focus:ring-4 focus:ring-red-50 transition-all outline-none text-sm"
           >
             <option value="">All Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
         </div>
+
+        {/* Clear Filters */}
+        {(roleFilter || statusFilter || search) && (
+          <Button
+            variant="outline"
+            onClick={handleClearFilters}
+            className="px-4 py-2 border-2 border-gray-200 rounded-xl
+                       hover:border-[#C41E3A] hover:bg-[#FFF5F6]
+                       transition-all text-sm font-semibold flex items-center gap-2"
+          >
+            <X className="w-4 h-4" />
+            Clear Filters
+          </Button>
+        )}
       </div>
 
       {/* Table */}
@@ -231,7 +257,7 @@ export function UserManagementTable() {
                   </TableCell>
                 </TableRow>
               ) : (
-                users.map((user) => (
+                paginatedUsers.map((user) => (
                   <TableRow key={user.id} className="hover:bg-[#FFF5F6]">
                     <TableCell className="font-medium">
                       {user.first_name} {user.last_name}
@@ -287,9 +313,36 @@ export function UserManagementTable() {
         </div>
       )}
 
-      <div className="mt-4 text-sm text-gray-500 text-center">
-        Showing {users.length} user{users.length !== 1 ? 's' : ''}
-      </div>
+      {totalPages > 1 ? (
+        <div className="flex justify-between items-center mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-4 border-2 border-gray-200 rounded-lg hover:border-[#C41E3A] transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-gray-500">
+            Page {page} of {totalPages}
+            <span className="text-gray-400 ml-2">· {users.length} user{users.length !== 1 ? 's' : ''}</span>
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-4 border-2 border-gray-200 rounded-lg hover:border-[#C41E3A] transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </Button>
+        </div>
+      ) : (
+        <div className="mt-4 text-sm text-gray-500 text-center">
+          Showing {users.length} user{users.length !== 1 ? 's' : ''}
+        </div>
+      )}
 
       {/* Create User Dialog */}
       <CreateUserDialog

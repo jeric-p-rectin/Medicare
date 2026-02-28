@@ -6,6 +6,7 @@ import { ArrowLeft, Edit, Calendar, Phone, MapPin, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DeleteRecordDialog } from '@/components/medical-records/delete-record-dialog';
+import { DownloadPdfButton } from '@/components/medical-records/download-pdf-button';
 import type { Student } from '@/types/student';
 import type { MedicalRecord } from '@/types/medical-record';
 
@@ -125,6 +126,13 @@ export default function IndividualPatientPage() {
                 </div>
 
                 <div>
+                  <div className="text-sm text-gray-500">School Year</div>
+                  <div className="font-semibold">
+                    {patient.schoolYear ?? <span className="text-gray-400 italic font-normal">Not Set</span>}
+                  </div>
+                </div>
+
+                <div>
                   <div className="text-sm text-gray-500">Parents or Guardian Contact</div>
                   <div className="font-semibold">{patient.parentGuardianName}</div>
                   <div className="text-sm flex items-center gap-2 mt-1">
@@ -175,15 +183,22 @@ export default function IndividualPatientPage() {
               <CardTitle className="text-2xl font-bold text-gray-800">
                 Medical Records
               </CardTitle>
-              <Button
-                className="bg-gradient-to-r from-[#C41E3A] to-[#E63946]
-                         text-white rounded-lg font-semibold shadow-lg shadow-red-500/30
-                         hover:shadow-xl transition-all"
-                onClick={() => router.push(`/patients/${id}/new-record`)}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Record
-              </Button>
+              <div className="flex items-center gap-2">
+                <DownloadPdfButton
+                  variant="patient-report"
+                  patient={patient}
+                  records={patient.medicalRecords}
+                />
+                <Button
+                  className="bg-gradient-to-r from-[#C41E3A] to-[#E63946]
+                           text-white rounded-lg font-semibold shadow-lg shadow-red-500/30
+                           hover:shadow-xl transition-all"
+                  onClick={() => router.push(`/patients/${id}/new-record`)}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Record
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -207,6 +222,12 @@ export default function IndividualPatientPage() {
                             <div className="text-sm text-gray-500">
                               {new Date(record.visitDate).toLocaleDateString()}
                             </div>
+                            <DownloadPdfButton
+                              variant="single"
+                              record={record}
+                              patient={patient}
+                              size="sm"
+                            />
                             <DeleteRecordDialog
                               record={record}
                               studentId={id}

@@ -62,13 +62,15 @@ export async function GET(request: Request) {
     const search = searchParams.get('search') || '';
     const grade = searchParams.get('grade') || '';
     const section = searchParams.get('section') || '';
+    const schoolYear = searchParams.get('schoolYear') || '';
 
     const result = await findStudents({
       page,
       limit,
       search,
       grade: grade ? (grade as GradeLevel) : undefined,
-      section
+      section,
+      schoolYear: schoolYear || undefined,
     });
 
     return NextResponse.json(result);
@@ -129,6 +131,7 @@ export async function POST(request: Request) {
           sex: data.sex,
           gradeLevel: data.gradeLevel,
           section: data.section,
+          schoolYear: data.schoolYear,
           lrn: data.lrn,
           studentNumber: data.studentNumber,
           parentGuardianName: data.parentGuardianName,
@@ -178,6 +181,7 @@ export async function POST(request: Request) {
         sex: data.sex,
         gradeLevel: data.gradeLevel,
         section: data.section,
+        schoolYear: data.schoolYear,
         lrn: data.lrn,
         studentNumber: data.studentNumber,
         parentGuardianName: data.parentGuardianName,

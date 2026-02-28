@@ -15,6 +15,7 @@ import { useSections } from '@/hooks/useSections';
 import { SectionCombobox } from '@/components/registration/section-combobox';
 import { MedicalRecordsTable } from '@/components/medical-records/medical-records-table';
 import { BulkDeleteBar } from '@/components/medical-records/bulk-delete-bar';
+import { DownloadPdfButton } from '@/components/medical-records/download-pdf-button';
 import { EditRecordDialog } from '@/components/medical-records/edit-record-dialog';
 import { toast } from 'sonner';
 import type { MedicalRecordListResult, MedicalRecordWithStudent } from '@/types/medical-record';
@@ -189,12 +190,18 @@ export default function MedicalRecordsPage() {
             </div>
           </div>
           {selectedIds.size > 0 && (
-            <BulkDeleteBar
-              count={selectedIds.size}
-              onDelete={handleBulkDelete}
-              isDeleting={isDeleting}
-              onClearSelection={() => setSelectedIds(new Set())}
-            />
+            <div className="flex items-center gap-2">
+              <DownloadPdfButton
+                variant="bulk"
+                records={data?.records?.filter(r => selectedIds.has(r.id)) ?? []}
+              />
+              <BulkDeleteBar
+                count={selectedIds.size}
+                onDelete={handleBulkDelete}
+                isDeleting={isDeleting}
+                onClearSelection={() => setSelectedIds(new Set())}
+              />
+            </div>
           )}
         </div>
       </div>

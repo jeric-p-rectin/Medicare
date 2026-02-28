@@ -22,6 +22,7 @@ export interface Student {
   // Academic Information
   gradeLevel: GradeLevel;
   section: string;
+  schoolYear?: string;
 
   // Contact Information
   address: string;
@@ -56,6 +57,7 @@ export interface StudentCreateInput {
   // Academic Information
   gradeLevel: GradeLevel;
   section: string;
+  schoolYear?: string;
 
   // Student Identification
   lrn: string;
@@ -83,6 +85,7 @@ export interface StudentUpdateInput {
   sex?: Sex;
   gradeLevel?: GradeLevel;
   section?: string;
+  schoolYear?: string;
   address?: string;
   parentGuardianName?: string;
   parentGuardianContact?: string;
@@ -105,6 +108,8 @@ export interface StudentSearchOptions {
   grade?: GradeLevel;
   /** Filter by section (e.g., "A", "B", "C", "D") */
   section?: string;
+  /** Filter by school year (e.g., "2025-2026") */
+  schoolYear?: string;
 }
 
 export interface StudentListResult {

@@ -38,6 +38,8 @@ export default function EditPatientPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [patient, setPatient] = useState<Student | null>(null);
+  const [startYear, setStartYear] = useState('');
+  const [endYear, setEndYear] = useState('');
 
   const {
     register,
@@ -88,6 +90,13 @@ export default function EditPatientPage() {
           setValue('parentGuardianContact', data.parentGuardianContact);
           setValue('bmi', data.bmi ? String(data.bmi) : '');
           setValue('healthHistory', data.healthHistory || '');
+          if (data.schoolYear) {
+            const parts = data.schoolYear.split('-');
+            if (parts.length === 2) {
+              setStartYear(parts[0]);
+              setEndYear(parts[1]);
+            }
+          }
         } else {
           setError('Failed to load patient data');
         }
@@ -116,6 +125,7 @@ export default function EditPatientPage() {
           ...data,
           age: calculateAge(data.dateOfBirth),
           bmi: data.bmi ? parseFloat(data.bmi) : undefined,
+          schoolYear: startYear && endYear ? `${startYear}-${endYear}` : undefined,
         }),
       });
 
@@ -332,6 +342,43 @@ export default function EditPatientPage() {
                   <p className="text-xs text-gray-500 mt-2 italic">
                     LRN and Student Number cannot be edited
                   </p>
+                </div>
+
+                {/* School Year */}
+                <div className="mt-6">
+                  <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                    School Year
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <Input
+                      type="number"
+                      value={startYear}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setStartYear(val);
+                        if (val.length === 4) {
+                          setEndYear(String(parseInt(val) + 1));
+                        } else {
+                          setEndYear('');
+                        }
+                      }}
+                      placeholder="2025"
+                      maxLength={4}
+                      className="w-28 px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl
+                               focus:border-[#C41E3A] focus:bg-white focus:ring-4 focus:ring-red-50
+                               transition-all outline-none"
+                    />
+                    <span className="text-gray-500 font-semibold text-lg">-</span>
+                    <Input
+                      type="number"
+                      value={endYear}
+                      readOnly
+                      placeholder="2026"
+                      className="w-28 px-4 py-3 bg-gray-100 border-2 border-gray-100 rounded-xl
+                               outline-none cursor-not-allowed text-gray-500"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">End year is auto-filled</p>
                 </div>
               </div>
 

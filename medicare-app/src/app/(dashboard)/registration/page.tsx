@@ -43,6 +43,8 @@ export default function RegistrationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [startYear, setStartYear] = useState('');
+  const [endYear, setEndYear] = useState('');
   const [credentials, setCredentials] = useState<{
     username: string;
     password: string;
@@ -50,6 +52,7 @@ export default function RegistrationPage() {
     studentName: string;
     gradeLevel: string;
     section: string;
+    schoolYear?: string;
     email?: string;
   } | null>(null);
 
@@ -100,6 +103,9 @@ export default function RegistrationPage() {
       const studentNumber = `STU${Date.now()}`;
       const password = `student${Math.floor(Math.random() * 10000)}`; // Generate temp password
 
+      // Build school year string
+      const schoolYear = startYear && endYear ? `${startYear}-${endYear}` : undefined;
+
       // Store credentials for display after successful registration
       const tempCredentials = {
         username,
@@ -108,6 +114,7 @@ export default function RegistrationPage() {
         studentName: `${data.firstName} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName}`,
         gradeLevel: data.gradeLevel,
         section: data.section,
+        schoolYear,
         email: data.email || undefined,
       };
 
@@ -120,6 +127,7 @@ export default function RegistrationPage() {
           studentNumber,
           password,
           age,
+          schoolYear,
           bmi: data.bmi ? parseFloat(data.bmi) : undefined,
         }),
       });
@@ -158,6 +166,8 @@ export default function RegistrationPage() {
     setRegistrationSuccess(false);
     setCredentials(null);
     setError('');
+    setStartYear('');
+    setEndYear('');
   };
 
   return (
@@ -175,6 +185,7 @@ export default function RegistrationPage() {
             studentName={credentials.studentName}
             gradeLevel={credentials.gradeLevel}
             section={credentials.section}
+            schoolYear={credentials.schoolYear}
             email={credentials.email}
             onRegisterAnother={handleRegisterAnother}
           />
@@ -383,6 +394,43 @@ export default function RegistrationPage() {
                   {errors.lrn && (
                     <p className="text-red-500 text-sm mt-1">{errors.lrn.message}</p>
                   )}
+                </div>
+
+                {/* School Year */}
+                <div className="mt-6">
+                  <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                    School Year
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <Input
+                      type="number"
+                      value={startYear}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setStartYear(val);
+                        if (val.length === 4) {
+                          setEndYear(String(parseInt(val) + 1));
+                        } else {
+                          setEndYear('');
+                        }
+                      }}
+                      placeholder="2025"
+                      maxLength={4}
+                      className="w-28 px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl
+                               focus:border-[#C41E3A] focus:bg-white focus:ring-4 focus:ring-red-50
+                               transition-all outline-none"
+                    />
+                    <span className="text-gray-500 font-semibold text-lg">-</span>
+                    <Input
+                      type="number"
+                      value={endYear}
+                      readOnly
+                      placeholder="2026"
+                      className="w-28 px-4 py-3 bg-gray-100 border-2 border-gray-100 rounded-xl
+                               outline-none cursor-not-allowed text-gray-500"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Optional — end year is auto-filled</p>
                 </div>
               </div>
 

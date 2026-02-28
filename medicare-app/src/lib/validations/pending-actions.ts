@@ -47,6 +47,7 @@ export const registrationActionDataSchema = z.object({
   sex: z.enum(['MALE', 'FEMALE']),
   gradeLevel: z.enum(['7', '8', '9', '10', '11', '12', 'Non-Graded']),
   section: z.string().min(1, 'Section is required').max(50),
+  schoolYear: z.string().regex(/^\d{4}-\d{4}$/, 'Invalid school year format').optional(),
   lrn: z.string().length(12, 'LRN must be exactly 12 digits').regex(/^\d+$/, 'LRN must contain only numbers'),
   studentNumber: z.string().min(1, 'Student number is required').max(20),
   address: z.string().min(1, 'Address is required'),

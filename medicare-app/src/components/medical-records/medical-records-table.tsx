@@ -14,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DeleteRecordDialog } from './delete-record-dialog';
+import { DownloadPdfButton } from './download-pdf-button';
 import type { MedicalRecordWithStudent } from '@/types/medical-record';
 import { Loader2 } from 'lucide-react';
 
@@ -143,6 +144,11 @@ export function MedicalRecordsTable({
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-1">
+                  <DownloadPdfButton
+                    variant="single"
+                    record={record}
+                    size="sm"
+                  />
                   <Button
                     variant="ghost"
                     size="sm"

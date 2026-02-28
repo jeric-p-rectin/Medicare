@@ -35,21 +35,24 @@ export default function PatientsPage() {
 
   const grade = searchParams.get('grade') || '';
   const section = searchParams.get('section') || '';
+  const schoolYear = searchParams.get('schoolYear') || '';
 
   const [gradeFilter, setGradeFilter] = useState<string>(grade);
   const [sectionFilter, setSectionFilter] = useState<string>(section);
+  const [schoolYearFilter, setSchoolYearFilter] = useState<string>(schoolYear);
 
   // Fetch sections dynamically based on selected grade
   const { sections, isLoading: sectionsLoading } = useSections(gradeFilter);
 
   useEffect(() => {
     fetchPatients();
-  }, [searchQuery, page, grade, section]);
+  }, [searchQuery, page, grade, section, schoolYear]);
 
   useEffect(() => {
     setGradeFilter(grade);
     setSectionFilter(section);
-  }, [grade, section]);
+    setSchoolYearFilter(schoolYear);
+  }, [grade, section, schoolYear]);
 
   const fetchPatients = async () => {
     try {
@@ -59,6 +62,7 @@ export default function PatientsPage() {
         ...(searchQuery && { search: searchQuery }),
         ...(grade && { grade }),
         ...(section && { section }),
+        ...(schoolYear && { schoolYear }),
       });
 
       const response = await fetch(`/api/students?${params}`);
@@ -104,9 +108,22 @@ export default function PatientsPage() {
     router.push(`/patients?${params.toString()}`);
   };
 
+  const handleSchoolYearChange = (value: string) => {
+    setSchoolYearFilter(value);
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set('schoolYear', value);
+    } else {
+      params.delete('schoolYear');
+    }
+    params.set('page', '1');
+    router.push(`/patients?${params.toString()}`);
+  };
+
   const handleClearFilters = () => {
     setGradeFilter('');
     setSectionFilter('');
+    setSchoolYearFilter('');
     setSearchQuery('');
     router.push('/patients?page=1');
   };
@@ -183,8 +200,25 @@ export default function PatientsPage() {
             </div>
           </div>
 
+          {/* School Year Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">School Year:</span>
+            <Select value={schoolYearFilter || undefined} onValueChange={handleSchoolYearChange}>
+              <SelectTrigger className="w-[160px] bg-white border-2 border-gray-100 rounded-xl
+                                       focus:border-[#C41E3A] transition-all">
+                <SelectValue placeholder="All Years" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2023-2024">2023-2024</SelectItem>
+                <SelectItem value="2024-2025">2024-2025</SelectItem>
+                <SelectItem value="2025-2026">2025-2026</SelectItem>
+                <SelectItem value="2026-2027">2026-2027</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Clear Filters Button */}
-          {(gradeFilter || sectionFilter || searchQuery) && (
+          {(gradeFilter || sectionFilter || schoolYearFilter || searchQuery) && (
             <Button
               variant="outline"
               onClick={handleClearFilters}
@@ -198,9 +232,9 @@ export default function PatientsPage() {
           )}
 
           {/* Active Filters Count */}
-          {(gradeFilter || sectionFilter || searchQuery) && (
+          {(gradeFilter || sectionFilter || schoolYearFilter || searchQuery) && (
             <span className="text-sm text-gray-500">
-              {[searchQuery, gradeFilter, sectionFilter].filter(Boolean).length} filter(s) active
+              {[searchQuery, gradeFilter, sectionFilter, schoolYearFilter].filter(Boolean).length} filter(s) active
             </span>
           )}
         </div>
@@ -217,6 +251,9 @@ export default function PatientsPage() {
                 <TableHead className="hidden sm:table-cell px-6 py-4 text-left text-sm font-semibold text-gray-700">
                   Grade Level and Section
                 </TableHead>
+                <TableHead className="hidden md:table-cell px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  School Year
+                </TableHead>
                 <TableHead className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
                   Actions
                 </TableHead>
@@ -225,7 +262,7 @@ export default function PatientsPage() {
             <TableBody className="divide-y divide-gray-100">
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-12">
+                  <TableCell colSpan={4} className="text-center py-12">
                     <div className="flex items-center justify-center">
                       <Loader2 className="w-8 h-8 animate-spin text-[#C41E3A]" />
                     </div>
@@ -233,7 +270,7 @@ export default function PatientsPage() {
                 </TableRow>
               ) : data?.students.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-12 text-gray-500">
+                  <TableCell colSpan={4} className="text-center py-12 text-gray-500">
                     No patients found
                   </TableCell>
                 </TableRow>
@@ -249,6 +286,9 @@ export default function PatientsPage() {
                     </TableCell>
                     <TableCell className="hidden sm:table-cell px-6 py-4 text-gray-600">
                       Grade {patient.gradeLevel} - {patient.section}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell px-6 py-4 text-gray-600">
+                      {patient.schoolYear ?? <span className="text-gray-400 italic">Not Set</span>}
                     </TableCell>
                     <TableCell className="px-6 py-4 text-center">
                       <Button

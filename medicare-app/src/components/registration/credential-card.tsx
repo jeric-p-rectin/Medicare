@@ -14,6 +14,7 @@ interface CredentialCardProps {
   studentName: string;
   gradeLevel: string;
   section: string;
+  schoolYear?: string;
   email?: string;
   onRegisterAnother: () => void;
 }
@@ -25,6 +26,7 @@ export function CredentialCard({
   studentName,
   gradeLevel,
   section,
+  schoolYear,
   email,
   onRegisterAnother,
 }: CredentialCardProps) {
@@ -66,13 +68,18 @@ export function CredentialCard({
           {/* Student Information */}
           <div className="text-center">
             <h3 className="text-xl font-bold text-gray-800 mb-1">{studentName}</h3>
-            <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center justify-center gap-4 text-sm text-gray-600 flex-wrap">
               <div>
                 <span className="font-semibold">Student Number:</span> {studentNumber}
               </div>
               <div>
                 <span className="font-semibold">Grade:</span> {gradeLevel} - {section}
               </div>
+              {schoolYear && (
+                <div>
+                  <span className="font-semibold">School Year:</span> {schoolYear}
+                </div>
+              )}
             </div>
           </div>
 

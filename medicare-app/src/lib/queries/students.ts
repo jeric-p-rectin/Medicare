@@ -6,7 +6,7 @@ import { UserRow } from '@/types/api-response';
  * Find students with search, pagination, and filters
  */
 export async function findStudents(options: StudentSearchOptions): Promise<StudentListResult> {
-  const { page = 1, limit = 20, search = '', grade = '', section = '' } = options;
+  const { page = 1, limit = 20, search = '', grade = '', section = '', schoolYear = '' } = options;
 
   // Validate pagination parameters (should already be numbers from API route)
   const pageInt = typeof page === 'number' && !isNaN(page) && page > 0
@@ -22,7 +22,7 @@ export async function findStudents(options: StudentSearchOptions): Promise<Stude
   // DEBUG: Log validated values
   if (process.env.NODE_ENV === 'development') {
     console.log('[findStudents] Pagination:', { pageInt, limitInt, offset });
-    console.log('[findStudents] Filters:', { search, grade, section });
+    console.log('[findStudents] Filters:', { search, grade, section, schoolYear });
   }
 
   const whereClauses: string[] = [];
@@ -52,6 +52,12 @@ export async function findStudents(options: StudentSearchOptions): Promise<Stude
     params.push(section);
   }
 
+  // School year filter
+  if (schoolYear) {
+    whereClauses.push('s.school_year = ?');
+    params.push(schoolYear);
+  }
+
   const whereClause = whereClauses.length > 0
     ? `WHERE ${whereClauses.join(' AND ')}`
     : '';
@@ -71,6 +77,7 @@ export async function findStudents(options: StudentSearchOptions): Promise<Stude
       s.sex,
       s.grade_level as gradeLevel,
       s.section,
+      s.school_year as schoolYear,
       s.lrn,
       s.student_number as studentNumber,
       s.parent_guardian_name as parentGuardianName,
@@ -127,6 +134,7 @@ export async function findStudentById(id: string): Promise<Student | null> {
       s.sex,
       s.grade_level as gradeLevel,
       s.section,
+      s.school_year as schoolYear,
       s.lrn,
       s.student_number as studentNumber,
       s.parent_guardian_name as parentGuardianName,
@@ -200,11 +208,11 @@ export async function createStudent(data: StudentCreateInput): Promise<string> {
     const studentSql = `
       INSERT INTO students (
         id, user_id, lrn, student_number, date_of_birth, age, sex,
-        grade_level, section, address, parent_guardian_name, parent_guardian_contact,
+        grade_level, section, school_year, address, parent_guardian_name, parent_guardian_contact,
         bmi, health_history, created_by_id
       ) VALUES (
         UUID(), ?, ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?,
         ?, ?, ?
       )
     `;
@@ -218,6 +226,7 @@ export async function createStudent(data: StudentCreateInput): Promise<string> {
       data.sex,
       data.gradeLevel,
       data.section,
+      data.schoolYear ?? null,
       data.address,
       data.parentGuardianName,
       data.parentGuardianContact,
@@ -275,6 +284,10 @@ export async function updateStudent(id: string, data: StudentUpdateInput): Promi
   if (data.section) {
     updates.push('s.section = ?');
     params.push(data.section);
+  }
+  if (data.schoolYear !== undefined) {
+    updates.push('s.school_year = ?');
+    params.push(data.schoolYear || null);
   }
   if (data.address) {
     updates.push('s.address = ?');
@@ -371,6 +384,7 @@ export async function findStudentByUserId(userId: string): Promise<Student | nul
       s.sex,
       s.grade_level as gradeLevel,
       s.section,
+      s.school_year as schoolYear,
       s.lrn,
       s.student_number as studentNumber,
       s.parent_guardian_name as parentGuardianName,

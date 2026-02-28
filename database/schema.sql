@@ -68,6 +68,7 @@ CREATE TABLE students (
   -- Academic Information
   grade_level ENUM('7', '8', '9', '10', '11', '12') NOT NULL,
   section VARCHAR(50) NOT NULL,
+  school_year VARCHAR(9) NULL COMMENT 'e.g. 2025-2026',
 
   -- Contact Information
   address TEXT NOT NULL,

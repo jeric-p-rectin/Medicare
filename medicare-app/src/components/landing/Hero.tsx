@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { ParticleBackground } from '@/components/animations/ParticleBackground';
 
 // ─── Trust element data ───────────────────────────────────────────────────────
 const trustElements = [
@@ -82,6 +83,12 @@ export function Hero() {
           width: '40%', height: '50%',
           background: 'radial-gradient(circle, rgba(196,30,58,0.05) 0%, transparent 70%)',
         }} />
+
+        {/* ── Mobile-only: Particle Background ────────────────────────────── */}
+        {/* Adds dynamic movement on smaller screens to replace the heart visual */}
+        <div className="absolute inset-0 lg:hidden z-0 overflow-hidden pointer-events-none">
+          <ParticleBackground />
+        </div>
       </div>
 
       {/* ════════════════════════════════════════════════════════════════════════

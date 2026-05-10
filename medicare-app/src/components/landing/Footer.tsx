@@ -34,9 +34,7 @@ export function Footer() {
                 <p className="text-white/60 text-sm">Medical Electronic Database with Alert System</p>
               </div>
             </div>
-            <a href="mailto:medalertportal@gmail.com" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
-              medalertportal@gmail.com
-            </a>
+
           </div>
 
           {/* Navigation links */}

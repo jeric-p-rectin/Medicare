@@ -145,6 +145,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -164,8 +165,8 @@
 
 .gradient-bg-light {
   background: linear-gradient(135deg,
-    rgba(196, 30, 58, 0.05) 0%,
-    rgba(230, 57, 70, 0.05) 100%);
+      rgba(196, 30, 58, 0.05) 0%,
+      rgba(230, 57, 70, 0.05) 100%);
 }
 
 /* CTA Button with shine effect */
@@ -181,7 +182,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   transition: left 0.5s;
 }
 
@@ -191,8 +192,15 @@
 
 /* Floating animation for cards */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 .animate-float {
@@ -209,14 +217,30 @@
 
 /* Scroll indicator bounce */
 @keyframes bounce-scroll {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-10px);
+  }
 }
 
 /* Mouse wheel scroll animation */
 @keyframes scroll-wheel {
-  0%, 100% { top: 10px; opacity: 1; }
-  50% { top: 25px; opacity: 0.5; }
+
+  0%,
+  100% {
+    top: 10px;
+    opacity: 1;
+  }
+
+  50% {
+    top: 25px;
+    opacity: 0.5;
+  }
 }
 
 /* Slide in from left animation */
@@ -225,6 +249,7 @@
     opacity: 0;
     transform: translateX(-100px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -237,8 +262,15 @@
 
 /* Logo pulse animation */
 @keyframes logo-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.03); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.03);
+  }
 }
 
 .animate-logo-pulse {
@@ -251,9 +283,17 @@
 
 /* 1. Float + breathe ------------------------------------------------ */
 @keyframes heroHeartFloat {
-  0%   { transform: translateY(0px)   scale(1);     }
-  50%  { transform: translateY(-20px) scale(1.032); }
-  100% { transform: translateY(0px)   scale(1);     }
+  0% {
+    transform: translateY(0px) scale(1);
+  }
+
+  50% {
+    transform: translateY(-20px) scale(1.032);
+  }
+
+  100% {
+    transform: translateY(0px) scale(1);
+  }
 }
 
 .hero-heart-float {
@@ -280,14 +320,32 @@
   animation: heartRingPulse 3.6s ease-out infinite;
 }
 
-.heart-ring-1 { animation-delay: 0s; }
-.heart-ring-2 { animation-delay: 1.2s; }
-.heart-ring-3 { animation-delay: 2.4s; }
+.heart-ring-1 {
+  animation-delay: 0s;
+}
+
+.heart-ring-2 {
+  animation-delay: 1.2s;
+}
+
+.heart-ring-3 {
+  animation-delay: 2.4s;
+}
 
 @keyframes heartRingPulse {
-  0%   { transform: scale(0.75); opacity: 0.7; }
-  70%  { opacity: 0.15; }
-  100% { transform: scale(1.75); opacity: 0; }
+  0% {
+    transform: scale(0.75);
+    opacity: 0.7;
+  }
+
+  70% {
+    opacity: 0.15;
+  }
+
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
 }
 
 /* 3. Breathing glow blob -------------------------------------------- */
@@ -295,21 +353,30 @@
   position: absolute;
   inset: 5%;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(196, 30, 58, 0.18) 0%,
-    rgba(230, 57, 70, 0.08) 50%,
-    transparent 75%
-  );
+  background: radial-gradient(circle,
+      rgba(196, 30, 58, 0.18) 0%,
+      rgba(230, 57, 70, 0.08) 50%,
+      transparent 75%);
   filter: blur(28px);
   animation: heartGlowBreathe 6s ease-in-out infinite;
   pointer-events: none;
 }
 
 @keyframes heartGlowBreathe {
-  0%   { opacity: 0.7; transform: scale(1); }
-  50%  { opacity: 1;   transform: scale(1.12); }
-  100% { opacity: 0.7; transform: scale(1); }
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
 }
 
 /* Mega CTA button ripple effect */
@@ -343,6 +410,7 @@ html {
 
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
+
   .animate-float,
   .animate-float-delay-1,
   .animate-float-delay-2,

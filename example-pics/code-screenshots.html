@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MED-Alert Code Screenshots - Technical Implementation & Technology Stack</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 40px 20px;
+  }
+  .page-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 10px;
+  }
+  .page-subtitle {
+    text-align: center;
+    font-size: 16px;
+    color: #8b949e;
+    margin-bottom: 50px;
+  }
+  .section-header {
+    font-size: 22px;
+    font-weight: 700;
+    color: #58a6ff;
+    margin: 50px auto 30px;
+    max-width: 900px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #21262d;
+  }
+  .code-card {
+    max-width: 900px;
+    margin: 30px auto;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #30363d;
+    background: #1e1e1e;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .code-card-header {
+    background: #2d2d2d;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #404040;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f56; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green { background: #27c93f; }
+  .filename {
+    color: #cccccc;
+    font-size: 13px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    margin-left: 8px;
+  }
+  .code-label {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #8b949e;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-style: italic;
+  }
+  pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    font-family: 'Consolas', 'Courier New', monospace;
+    background: #1e1e1e;
+    color: #d4d4d4;
+  }
+  /* Syntax highlighting */
+  .kw { color: #c586c0; }        /* keywords: import, export, const, if, etc */
+  .kw2 { color: #569cd6; }       /* type keywords: interface, type, async, function */
+  .str { color: #ce9178; }       /* strings */
+  .num { color: #b5cea8; }       /* numbers */
+  .cm { color: #6a9955; }        /* comments */
+  .fn { color: #dcdcaa; }        /* function names */
+  .tp { color: #4ec9b0; }        /* types/interfaces */
+  .pr { color: #9cdcfe; }        /* properties/variables */
+  .op { color: #d4d4d4; }        /* operators */
+  .tag { color: #569cd6; }       /* JSX tags */
+  .attr { color: #92c5f7; }      /* JSX attributes */
+  .dec { color: #dcdcaa; }       /* decorators */
+  .imp { color: #c586c0; }       /* import/export */
+
+  @media print {
+    body { background: white; }
+    .code-card { break-inside: avoid; page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">MED-Alert: Technical Implementation & Technology Stack</div>
+<div class="page-subtitle">Code Evidence Screenshots</div>
+
+<!-- ==================== SECTION 1: FRONTEND ==================== -->
+<div class="section-header">1. Frontend (What You See)</div>
+
+<!-- 1.1 Next.js -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">src/app/(dashboard)/dashboard/page.tsx</span>
+  </div>
+  <pre>
+<span class="cm">// Next.js App Router — Dashboard Page Component</span>
+<span class="imp">&#39;use client&#39;</span>;
+
+<span class="kw">import</span> { <span class="pr">useEffect</span>, <span class="pr">useState</span> } <span class="kw">from</span> <span class="str">&#39;react&#39;</span>;
+<span class="kw">import</span> { <span class="pr">useRouter</span>, <span class="pr">useSearchParams</span> } <span class="kw">from</span> <span class="str">&#39;next/navigation&#39;</span>;
+<span class="kw">import</span> { <span class="tp">Card</span>, <span class="tp">CardContent</span>, <span class="tp">CardHeader</span>, <span class="tp">CardTitle</span> } <span class="kw">from</span> <span class="str">&#39;@/components/ui/card&#39;</span>;
+<span class="kw">import</span> { <span class="tp">Loader2</span>, <span class="tp">AlertCircle</span> } <span class="kw">from</span> <span class="str">&#39;lucide-react&#39;</span>;
+<span class="kw">import</span> { <span class="pr">useSession</span> } <span class="kw">from</span> <span class="str">&#39;next-auth/react&#39;</span>;
+<span class="kw">import</span> <span class="kw2">type</span> { <span class="tp">DashboardStats</span> } <span class="kw">from</span> <span class="str">&#39;@/types/statistics&#39;</span>;
+
+<span class="kw">export default</span> <span class="kw2">function</span> <span class="fn">SchoolWideDashboard</span>() {
+  <span class="kw">const</span> <span class="pr">router</span> = <span class="fn">useRouter</span>();
+  <span class="kw">const</span> <span class="pr">searchParams</span> = <span class="fn">useSearchParams</span>();
+  <span class="kw">const</span> { <span class="pr">data</span>: <span class="pr">session</span> } = <span class="fn">useSession</span>();
+  <span class="kw">const</span> [<span class="pr">stats</span>, <span class="pr">setStats</span>] = <span class="fn">useState</span>&lt;<span class="tp">DashboardStats</span> | <span class="kw2">null</span>&gt;(<span class="kw2">null</span>);
+  <span class="kw">const</span> [<span class="pr">loading</span>, <span class="pr">setLoading</span>] = <span class="fn">useState</span>(<span class="kw2">true</span>);
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="fn">fetchDashboardStats</span>();
+  }, []);
+
+  <span class="kw">const</span> <span class="fn">fetchDashboardStats</span> = <span class="kw2">async</span> () =&gt; {
+    <span class="kw">try</span> {
+      <span class="kw">const</span> <span class="pr">response</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">&#39;/api/dashboard/stats&#39;</span>);
+      <span class="kw">if</span> (<span class="pr">response</span>.<span class="pr">ok</span>) {
+        <span class="kw">const</span> <span class="pr">data</span> = <span class="kw">await</span> <span class="pr">response</span>.<span class="fn">json</span>();
+        <span class="fn">setStats</span>(<span class="pr">data</span>);
+      }
+    } <span class="kw">catch</span> (<span class="pr">error</span>) {
+      <span class="pr">console</span>.<span class="fn">error</span>(<span class="str">&#39;Error fetching dashboard stats:&#39;</span>, <span class="pr">error</span>);
+    } <span class="kw">finally</span> {
+      <span class="fn">setLoading</span>(<span class="kw2">false</span>);
+    }
+  };
+</pre>
+</div>
+<div class="code-label">Image 1.1 — Next.js App Router: Dashboard Page with Data Fetching</div>
+
+<!-- 1.2 React -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">src/hooks/useAlerts.ts</span>
+  </div>
+  <pre>
+<span class="kw">import</span> <span class="pr">useSWR</span> <span class="kw">from</span> <span class="str">&#39;swr&#39;</span>;
+<span class="kw">import</span> <span class="kw2">type</span> { <span class="tp">Alert</span> } <span class="kw">from</span> <span class="str">&#39;@/types/alert&#39;</span>;
+
+<span class="kw">const</span> <span class="fn">fetcher</span> = <span class="kw2">async</span> (<span class="pr">url</span>: <span class="tp">string</span>) =&gt; {
+  <span class="kw">const</span> <span class="pr">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="pr">url</span>);
+  <span class="kw">if</span> (!<span class="pr">res</span>.<span class="pr">ok</span>) <span class="kw">throw new</span> <span class="tp">Error</span>(<span class="str">&#39;Failed to fetch alerts&#39;</span>);
+  <span class="kw">return</span> <span class="pr">res</span>.<span class="fn">json</span>();
+};
+
+<span class="kw2">interface</span> <span class="tp">UseAlertsOptions</span> {
+  <span class="pr">unreadOnly</span>?: <span class="tp">boolean</span>;
+  <span class="pr">refreshInterval</span>?: <span class="tp">number</span>;
+}
+
+<span class="kw">export</span> <span class="kw2">function</span> <span class="fn">useAlerts</span>(<span class="pr">options</span>: <span class="tp">UseAlertsOptions</span> = {}) {
+  <span class="kw">const</span> {
+    <span class="pr">unreadOnly</span> = <span class="kw2">false</span>,
+    <span class="pr">refreshInterval</span> = <span class="num">5000</span> <span class="cm">// Poll every 5 seconds for real-time notifications</span>
+  } = <span class="pr">options</span>;
+
+  <span class="kw">const</span> <span class="pr">url</span> = <span class="str">`/api/alerts${unreadOnly ? &#39;?unread=true&#39; : &#39;&#39;}`</span>;
+
+  <span class="kw">const</span> { <span class="pr">data</span>, <span class="pr">error</span>, <span class="pr">mutate</span>, <span class="pr">isLoading</span> } = <span class="fn">useSWR</span>&lt;<span class="tp">Alert</span>[]&gt;(
+    <span class="pr">url</span>,
+    <span class="pr">fetcher</span>,
+    { <span class="pr">refreshInterval</span> }  <span class="cm">// Auto re-fetches every 5 seconds</span>
+  );
+
+  <span class="kw">const</span> <span class="fn">markAsRead</span> = <span class="kw2">async</span> (<span class="pr">alertId</span>: <span class="tp">string</span>) =&gt; {
+    <span class="kw">const</span> <span class="pr">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`/api/alerts/${alertId}/read`</span>, {
+      <span class="pr">method</span>: <span class="str">&#39;PUT&#39;</span>,
+    });
+    <span class="kw">if</span> (!<span class="pr">res</span>.<span class="pr">ok</span>) <span class="kw">throw new</span> <span class="tp">Error</span>(<span class="str">&#39;Failed to mark alert as read&#39;</span>);
+    <span class="fn">mutate</span>();  <span class="cm">// Triggers SWR re-validation (optimistic update)</span>
+  };
+
+  <span class="kw">const</span> <span class="fn">resolveAlert</span> = <span class="kw2">async</span> (<span class="pr">alertId</span>: <span class="tp">string</span>, <span class="pr">notes</span>?: <span class="tp">string</span>) =&gt; {
+    <span class="kw">const</span> <span class="pr">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`/api/alerts/${alertId}/resolve`</span>, {
+      <span class="pr">method</span>: <span class="str">&#39;PUT&#39;</span>,
+      <span class="pr">headers</span>: { <span class="str">&#39;Content-Type&#39;</span>: <span class="str">&#39;application/json&#39;</span> },
+    });
+    <span class="kw">if</span> (!<span class="pr">res</span>.<span class="pr">ok</span>) <span class="kw">throw new</span> <span class="tp">Error</span>(<span class="str">&#39;Failed to resolve alert&#39;</span>);
+    <span class="fn">mutate</span>();
+  };
+</pre>
+</div>
+<div class="code-label">Image 1.2 — React: Custom Hook with Real-Time SWR Polling & Optimistic Updates</div>
+
+<!-- 1.3 Tailwind CSS -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">src/components/layout/sidebar.tsx</span>
+  </div>
+  <pre>
+<span class="cm">// Sidebar Navigation with Tailwind CSS Medical Theme</span>
+<span class="kw2">function</span> <span class="fn">NavContent</span>({ <span class="pr">navItems</span>, <span class="pr">pathname</span>, <span class="pr">onMobileClose</span>, <span class="pr">onLogout</span> }: <span class="tp">NavContentProps</span>) {
+  <span class="kw">return</span> (
+    &lt;&gt;
+      <span class="cm">{/* Logo Section */}</span>
+      &lt;<span class="tag">div</span> <span class="attr">className</span>=<span class="str">&quot;p-6 border-b border-gray-100&quot;</span>&gt;
+        &lt;<span class="tag">Link</span> <span class="attr">href</span>=<span class="str">&quot;/dashboard&quot;</span> <span class="attr">className</span>=<span class="str">&quot;flex items-center gap-3&quot;</span>&gt;
+          &lt;<span class="tag">Image</span> <span class="attr">src</span>=<span class="str">&quot;/logo.png&quot;</span> <span class="attr">alt</span>=<span class="str">&quot;MED-Alert&quot;</span> <span class="attr">width</span>={<span class="num">40</span>} <span class="attr">height</span>={<span class="num">40</span>} /&gt;
+          &lt;<span class="tag">div</span>&gt;
+            &lt;<span class="tag">h1</span> <span class="attr">className</span>=<span class="str">&quot;text-xl font-bold&quot;</span> <span class="attr">style</span>={{ <span class="pr">color</span>: <span class="str">&#39;#C41E3A&#39;</span> }}&gt;
+              MED-Alert
+            &lt;/<span class="tag">h1</span>&gt;
+            &lt;<span class="tag">p</span> <span class="attr">className</span>=<span class="str">&quot;text-xs text-gray-500&quot;</span>&gt;School Clinic System&lt;/<span class="tag">p</span>&gt;
+          &lt;/<span class="tag">div</span>&gt;
+        &lt;/<span class="tag">Link</span>&gt;
+      &lt;/<span class="tag">div</span>&gt;
+
+      <span class="cm">{/* Navigation Items */}</span>
+      &lt;<span class="tag">nav</span> <span class="attr">className</span>=<span class="str">&quot;flex-1 min-h-0 p-4 space-y-2 overflow-y-auto&quot;</span>&gt;
+        {<span class="pr">navItems</span>.<span class="fn">map</span>((<span class="pr">item</span>) =&gt; {
+          <span class="kw">const</span> <span class="pr">isActive</span> = <span class="pr">pathname</span> === <span class="pr">item</span>.<span class="pr">href</span>;
+          <span class="kw">return</span> (
+            &lt;<span class="tag">Link</span>
+              <span class="attr">key</span>={<span class="pr">item</span>.<span class="pr">href</span>}
+              <span class="attr">href</span>={<span class="pr">item</span>.<span class="pr">href</span>}
+              <span class="attr">className</span>={<span class="fn">cn</span>(
+                <span class="str">&#39;flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200&#39;</span>,
+                <span class="pr">isActive</span>
+                  ? <span class="str">&#39;text-white shadow-lg&#39;</span>
+                  : <span class="str">&#39;text-gray-600 hover:bg-red-50 hover:text-[#C41E3A]&#39;</span>
+              )}
+              <span class="attr">style</span>={<span class="pr">isActive</span> ? {
+                <span class="pr">background</span>: <span class="str">&#39;linear-gradient(135deg, #C41E3A 0%, #E63946 100%)&#39;</span>,
+                <span class="pr">boxShadow</span>: <span class="str">&#39;0 4px 12px rgba(196, 30, 58, 0.3)&#39;</span>,
+              } : <span class="kw2">undefined</span>}
+            &gt;
+              &lt;<span class="tag">Icon</span> <span class="attr">className</span>=<span class="str">&quot;w-5 h-5&quot;</span> /&gt;
+              &lt;<span class="tag">span</span>&gt;{<span class="pr">item</span>.<span class="pr">label</span>}&lt;/<span class="tag">span</span>&gt;
+            &lt;/<span class="tag">Link</span>&gt;
+          );
+        })}
+      &lt;/<span class="tag">nav</span>&gt;
+
+      <span class="cm">{/* Logout Button */}</span>
+      &lt;<span class="tag">div</span> <span class="attr">className</span>=<span class="str">&quot;p-4 border-t border-gray-100&quot;</span>&gt;
+        &lt;<span class="tag">button</span>
+          <span class="attr">onClick</span>={<span class="pr">onLogout</span>}
+          <span class="attr">className</span>=<span class="str">&quot;flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-600 hover:bg-red-50 transition-all duration-200 w-full&quot;</span>
+        &gt;
+          &lt;<span class="tag">LogOut</span> <span class="attr">className</span>=<span class="str">&quot;w-5 h-5&quot;</span> /&gt;
+          &lt;<span class="tag">span</span>&gt;Logout&lt;/<span class="tag">span</span>&gt;
+        &lt;/<span class="tag">button</span>&gt;
+      &lt;/<span class="tag">div</span>&gt;
+    &lt;/&gt;
+  );
+}
+</pre>
+</div>
+<div class="code-label">Image 1.3 — Tailwind CSS: Medical Red Theme, Responsive Layout & Gradient Styling</div>
+
+<!-- ==================== SECTION 2: BACKEND ==================== -->
+<div class="section-header">2. Backend (The Brain & Storage)</div>
+
+<!-- 2.1 MySQL Connection Pool -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">src/lib/db.ts</span>
+  </div>
+  <pre>
+<span class="kw">import</span> <span class="pr">mysql</span>, { <span class="tp">Pool</span>, <span class="tp">PoolConnection</span>, <span class="tp">RowDataPacket</span>, <span class="tp">ResultSetHeader</span> } <span class="kw">from</span> <span class="str">&#39;mysql2/promise&#39;</span>;
+
+<span class="cm">// Create connection pool with Aiven-compatible settings</span>
+<span class="kw">const</span> <span class="pr">pool</span>: <span class="tp">Pool</span> = <span class="pr">mysql</span>.<span class="fn">createPool</span>({
+  <span class="pr">host</span>: <span class="pr">process</span>.<span class="pr">env</span>.<span class="pr">DB_HOST</span>,
+  <span class="pr">port</span>: <span class="fn">parseInt</span>(<span class="pr">process</span>.<span class="pr">env</span>.<span class="pr">DB_PORT</span> || <span class="str">&#39;3306&#39;</span>),
+  <span class="pr">user</span>: <span class="pr">process</span>.<span class="pr">env</span>.<span class="pr">DB_USER</span>,
+  <span class="pr">password</span>: <span class="pr">process</span>.<span class="pr">env</span>.<span class="pr">DB_PASSWORD</span>,
+  <span class="pr">database</span>: <span class="pr">process</span>.<span class="pr">env</span>.<span class="pr">DB_NAME</span>,
+  <span class="pr">waitForConnections</span>: <span class="kw2">true</span>,
+  <span class="pr">connectionLimit</span>: <span class="num">5</span>,  <span class="cm">// Aiven free tier limit</span>
+  <span class="pr">queueLimit</span>: <span class="num">0</span>,
+  <span class="pr">enableKeepAlive</span>: <span class="kw2">true</span>,
+  <span class="pr">ssl</span>: {
+    <span class="pr">rejectUnauthorized</span>: <span class="kw2">false</span>
+  }
+});
+
+<span class="cm">/**
+ * Execute a query that returns multiple rows
+ * @param sql - SQL query string with ? placeholders
+ * @param params - Array of parameter values
+ * @returns Array of results
+ */</span>
+<span class="kw">export</span> <span class="kw2">async function</span> <span class="fn">query</span>&lt;<span class="tp">T</span> = <span class="tp">RowDataPacket</span>&gt;(
+  <span class="pr">sql</span>: <span class="tp">string</span>,
+  <span class="pr">params</span>?: (<span class="tp">string</span> | <span class="tp">number</span> | <span class="tp">boolean</span> | <span class="tp">Date</span> | <span class="kw2">null</span>)[]
+): <span class="tp">Promise</span>&lt;<span class="tp">T</span>[]&gt; {
+  <span class="kw">const</span> [<span class="pr">results</span>] = <span class="kw">await</span> <span class="pr">pool</span>.<span class="fn">execute</span>&lt;<span class="tp">RowDataPacket</span>[]&gt;(<span class="pr">sql</span>, <span class="pr">params</span>);
+  <span class="kw">return</span> <span class="pr">results</span> <span class="kw">as</span> <span class="tp">T</span>[];
+}
+
+<span class="cm">/**
+ * Execute multiple queries in a transaction
+ * Automatically commits on success, rolls back on error
+ */</span>
+<span class="kw">export</span> <span class="kw2">async function</span> <span class="fn">transaction</span>&lt;<span class="tp">T</span>&gt;(
+  <span class="pr">callback</span>: (<span class="pr">connection</span>: <span class="tp">PoolConnection</span>) =&gt; <span class="tp">Promise</span>&lt;<span class="tp">T</span>&gt;
+): <span class="tp">Promise</span>&lt;<span class="tp">T</span>&gt; {
+  <span class="kw">const</span> <span class="pr">connection</span> = <span class="kw">await</span> <span class="pr">pool</span>.<span class="fn">getConnection</span>();
+  <span class="kw">await</span> <span class="pr">connection</span>.<span class="fn">beginTransaction</span>();
+
+  <span class="kw">try</span> {
+    <span class="kw">const</span> <span class="pr">result</span> = <span class="kw">await</span> <span class="fn">callback</span>(<span class="pr">connection</span>);
+    <span class="kw">await</span> <span class="pr">connection</span>.<span class="fn">commit</span>();
+    <span class="kw">return</span> <span class="pr">result</span>;
+  } <span class="kw">catch</span> (<span class="pr">error</span>) {
+    <span class="kw">await</span> <span class="pr">connection</span>.<span class="fn">rollback</span>();
+    <span class="kw">throw</span> <span class="pr">error</span>;
+  } <span class="kw">finally</span> {
+    <span class="pr">connection</span>.<span class="fn">release</span>();
+  }
+}
+</pre>
+</div>
+<div class="code-label">Image 2.1 — MySQL: Database Connection Pool, Query Helpers & Transaction Wrapper</div>
+
+<!-- 2.2 MySQL SQL Queries -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">src/lib/queries/students.ts</span>
+  </div>
+  <pre>
+<span class="kw">import</span> { <span class="pr">query</span>, <span class="pr">queryOne</span>, <span class="pr">transaction</span> } <span class="kw">from</span> <span class="str">&#39;../db&#39;</span>;
+<span class="kw">import</span> <span class="kw2">type</span> { <span class="tp">Student</span>, <span class="tp">StudentSearchOptions</span>, <span class="tp">StudentListResult</span> } <span class="kw">from</span> <span class="str">&#39;@/types/student&#39;</span>;
+
+<span class="cm">/**
+ * Find students with search, pagination, and filters
+ */</span>
+<span class="kw">export</span> <span class="kw2">async function</span> <span class="fn">findStudents</span>(<span class="pr">options</span>: <span class="tp">StudentSearchOptions</span>): <span class="tp">Promise</span>&lt;<span class="tp">StudentListResult</span>&gt; {
+  <span class="kw">const</span> { <span class="pr">page</span> = <span class="num">1</span>, <span class="pr">limit</span> = <span class="num">20</span>, <span class="pr">search</span> = <span class="str">&#39;&#39;</span>, <span class="pr">grade</span> = <span class="str">&#39;&#39;</span> } = <span class="pr">options</span>;
+  <span class="kw">const</span> <span class="pr">offset</span> = (<span class="pr">page</span> - <span class="num">1</span>) * <span class="pr">limit</span>;
+
+  <span class="kw">const</span> <span class="pr">whereClauses</span>: <span class="tp">string</span>[] = [];
+  <span class="kw">const</span> <span class="pr">params</span>: (<span class="tp">string</span> | <span class="tp">number</span>)[] = [];
+
+  <span class="cm">// Search filter</span>
+  <span class="kw">if</span> (<span class="pr">search</span>) {
+    <span class="pr">whereClauses</span>.<span class="fn">push</span>(<span class="str">`(u.first_name LIKE ? OR u.last_name LIKE ? OR s.lrn LIKE ?)`</span>);
+    <span class="kw">const</span> <span class="pr">searchPattern</span> = <span class="str">`%${search}%`</span>;
+    <span class="pr">params</span>.<span class="fn">push</span>(<span class="pr">searchPattern</span>, <span class="pr">searchPattern</span>, <span class="pr">searchPattern</span>);
+  }
+
+  <span class="cm">// Grade filter</span>
+  <span class="kw">if</span> (<span class="pr">grade</span>) {
+    <span class="pr">whereClauses</span>.<span class="fn">push</span>(<span class="str">&#39;s.grade_level = ?&#39;</span>);
+    <span class="pr">params</span>.<span class="fn">push</span>(<span class="pr">grade</span>);
+  }
+
+  <span class="kw">const</span> <span class="pr">whereClause</span> = <span class="pr">whereClauses</span>.<span class="pr">length</span> &gt; <span class="num">0</span>
+    ? <span class="str">`WHERE ${whereClauses.join(&#39; AND &#39;)}`</span> : <span class="str">&#39;&#39;</span>;
+
+  <span class="cm">// SQL Query with JOIN, dynamic WHERE, and pagination</span>
+  <span class="kw">const</span> <span class="pr">sql</span> = <span class="str">`
+    SELECT
+      s.id, s.user_id as userId,
+      u.first_name as firstName, u.last_name as lastName,
+      s.age, s.date_of_birth as dateOfBirth, s.sex,
+      s.grade_level as gradeLevel, s.section,
+      s.lrn, s.student_number as studentNumber,
+      s.parent_guardian_name as parentGuardianName,
+      s.bmi, s.health_history as healthHistory
+    FROM students s
+    JOIN users u ON s.user_id = u.id
+    ${whereClause}
+    ORDER BY u.last_name, u.first_name
+    LIMIT ${limit} OFFSET ${offset}
+  `</span>;
+
+  <span class="kw">const</span> <span class="pr">students</span> = <span class="kw">await</span> <span class="fn">query</span>&lt;<span class="tp">Student</span>&gt;(<span class="pr">sql</span>, <span class="pr">params</span>);
+
+  <span class="cm">// Get total count for pagination</span>
+  <span class="kw">const</span> <span class="pr">countResult</span> = <span class="kw">await</span> <span class="fn">queryOne</span>&lt;{ <span class="pr">total</span>: <span class="tp">number</span> }&gt;(
+    <span class="str">`SELECT COUNT(*) as total FROM students s JOIN users u ON s.user_id = u.id ${whereClause}`</span>,
+    <span class="pr">params</span>
+  );
+
+  <span class="kw">return</span> { <span class="pr">students</span>, <span class="pr">total</span>: <span class="pr">countResult</span>?.<span class="pr">total</span> || <span class="num">0</span>, <span class="pr">page</span>, <span class="pr">limit</span> };
+}
+</pre>
+</div>
+<div class="code-label">Image 2.2 — MySQL: SQL Query with JOIN, Dynamic Filtering & Pagination</div>
+
+<!-- 2.3 TypeScript -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">src/types/student.ts &amp; src/types/user.ts</span>
+  </div>
+  <pre>
+<span class="cm">// ─── src/types/student.ts ───</span>
+
+<span class="kw">export</span> <span class="kw2">type</span> <span class="tp">GradeLevel</span> = <span class="str">&#39;7&#39;</span> | <span class="str">&#39;8&#39;</span> | <span class="str">&#39;9&#39;</span> | <span class="str">&#39;10&#39;</span> | <span class="str">&#39;11&#39;</span> | <span class="str">&#39;12&#39;</span> | <span class="str">&#39;Non-Graded&#39;</span>;
+<span class="kw">export</span> <span class="kw2">type</span> <span class="tp">Sex</span> = <span class="str">&#39;MALE&#39;</span> | <span class="str">&#39;FEMALE&#39;</span>;
+
+<span class="kw">export</span> <span class="kw2">interface</span> <span class="tp">Student</span> {
+  <span class="pr">id</span>: <span class="tp">string</span>;
+  <span class="pr">userId</span>: <span class="tp">string</span>;
+
+  <span class="cm">// Student Identification</span>
+  <span class="pr">lrn</span>: <span class="tp">string</span>;            <span class="cm">// Learner Reference Number</span>
+  <span class="pr">studentNumber</span>: <span class="tp">string</span>;
+
+  <span class="cm">// Personal Information</span>
+  <span class="pr">firstName</span>: <span class="tp">string</span>;
+  <span class="pr">lastName</span>: <span class="tp">string</span>;
+  <span class="pr">middleName</span>?: <span class="tp">string</span>;     <span class="cm">// optional</span>
+  <span class="pr">dateOfBirth</span>: <span class="tp">string</span>;     <span class="cm">// ISO date string</span>
+  <span class="pr">age</span>: <span class="tp">number</span>;
+  <span class="pr">sex</span>: <span class="tp">Sex</span>;
+
+  <span class="cm">// Academic Information</span>
+  <span class="pr">gradeLevel</span>: <span class="tp">GradeLevel</span>;
+  <span class="pr">section</span>: <span class="tp">string</span>;
+
+  <span class="cm">// Medical Information</span>
+  <span class="pr">bmi</span>?: <span class="tp">number</span>;
+  <span class="pr">healthHistory</span>?: <span class="tp">string</span>;
+
+  <span class="cm">// System Fields</span>
+  <span class="pr">createdAt</span>: <span class="tp">string</span>;
+  <span class="pr">updatedAt</span>: <span class="tp">string</span>;
+}
+
+<span class="cm">// ─── src/types/user.ts ───</span>
+
+<span class="kw">import</span> { <span class="tp">RowDataPacket</span> } <span class="kw">from</span> <span class="str">&#39;mysql2&#39;</span>;
+
+<span class="kw">export</span> <span class="kw2">type</span> <span class="tp">UserRole</span> = <span class="str">&#39;SUPER_ADMIN&#39;</span> | <span class="str">&#39;ADMIN&#39;</span> | <span class="str">&#39;PATIENT&#39;</span>;
+
+<span class="kw">export</span> <span class="kw2">interface</span> <span class="tp">User</span> <span class="kw">extends</span> <span class="tp">RowDataPacket</span> {
+  <span class="pr">id</span>: <span class="tp">string</span>;
+  <span class="pr">username</span>: <span class="tp">string</span>;
+  <span class="pr">email</span>: <span class="tp">string</span> | <span class="kw2">null</span>;
+  <span class="pr">password</span>: <span class="tp">string</span>;
+  <span class="pr">role</span>: <span class="tp">UserRole</span>;
+  <span class="pr">first_name</span>: <span class="tp">string</span>;
+  <span class="pr">last_name</span>: <span class="tp">string</span>;
+  <span class="pr">is_active</span>: <span class="tp">boolean</span>;
+  <span class="pr">last_login</span>: <span class="tp">Date</span> | <span class="kw2">null</span>;
+  <span class="pr">created_at</span>: <span class="tp">Date</span>;
+  <span class="pr">updated_at</span>: <span class="tp">Date</span>;
+}
+
+<span class="kw">export</span> <span class="kw2">interface</span> <span class="tp">SessionUser</span> {
+  <span class="pr">id</span>: <span class="tp">string</span>;
+  <span class="pr">name</span>?: <span class="tp">string</span> | <span class="kw2">null</span>;
+  <span class="pr">email</span>?: <span class="tp">string</span> | <span class="kw2">null</span>;
+  <span class="pr">role</span>: <span class="tp">UserRole</span>;
+}
+</pre>
+</div>
+<div class="code-label">Image 2.3 — TypeScript: Interfaces, Union Types & Type-Safe Definitions</div>
+
+<!-- ==================== SECTION 3: SECURITY ==================== -->
+<div class="section-header">3. Security (The Guard)</div>
+
+<!-- 3.1 NextAuth.js -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">src/lib/auth.ts</span>
+  </div>
+  <pre>
+<span class="kw">import</span> <span class="tp">NextAuth</span> <span class="kw">from</span> <span class="str">&#39;next-auth&#39;</span>;
+<span class="kw">import</span> <span class="tp">Credentials</span> <span class="kw">from</span> <span class="str">&#39;next-auth/providers/credentials&#39;</span>;
+<span class="kw">import</span> <span class="pr">bcrypt</span> <span class="kw">from</span> <span class="str">&#39;bcryptjs&#39;</span>;
+<span class="kw">import</span> { <span class="fn">findUserByUsername</span>, <span class="fn">updateUserLastLogin</span> } <span class="kw">from</span> <span class="str">&#39;./queries/users&#39;</span>;
+<span class="kw">import</span> <span class="kw2">type</span> { <span class="tp">UserRole</span> } <span class="kw">from</span> <span class="str">&#39;@/types/user&#39;</span>;
+
+<span class="kw">export const</span> { <span class="pr">handlers</span>, <span class="pr">signIn</span>, <span class="pr">signOut</span>, <span class="pr">auth</span> } = <span class="fn">NextAuth</span>({
+  <span class="pr">providers</span>: [
+    <span class="fn">Credentials</span>({
+      <span class="pr">credentials</span>: {
+        <span class="pr">username</span>: { <span class="pr">label</span>: <span class="str">&#39;Username&#39;</span>, <span class="pr">type</span>: <span class="str">&#39;text&#39;</span> },
+        <span class="pr">password</span>: { <span class="pr">label</span>: <span class="str">&#39;Password&#39;</span>, <span class="pr">type</span>: <span class="str">&#39;password&#39;</span> },
+      },
+      <span class="kw2">async</span> <span class="fn">authorize</span>(<span class="pr">credentials</span>) {
+        <span class="kw">if</span> (!<span class="pr">credentials</span>?.<span class="pr">username</span> || !<span class="pr">credentials</span>?.<span class="pr">password</span>) <span class="kw">return</span> <span class="kw2">null</span>;
+
+        <span class="kw">const</span> <span class="pr">username</span> = <span class="pr">credentials</span>.<span class="pr">username</span> <span class="kw">as</span> <span class="tp">string</span>;
+        <span class="kw">const</span> <span class="pr">password</span> = <span class="pr">credentials</span>.<span class="pr">password</span> <span class="kw">as</span> <span class="tp">string</span>;
+
+        <span class="cm">// Find user by username</span>
+        <span class="kw">const</span> <span class="pr">user</span> = <span class="kw">await</span> <span class="fn">findUserByUsername</span>(<span class="pr">username</span>);
+        <span class="kw">if</span> (!<span class="pr">user</span>) <span class="kw">return</span> <span class="kw2">null</span>;
+
+        <span class="cm">// Check if account is disabled</span>
+        <span class="kw">if</span> (!<span class="pr">user</span>.<span class="pr">is_active</span>) <span class="kw">throw new</span> <span class="tp">Error</span>(<span class="str">&#39;ACCOUNT_DISABLED&#39;</span>);
+
+        <span class="cm">// Verify password with bcrypt</span>
+        <span class="kw">const</span> <span class="pr">isValidPassword</span> = <span class="kw">await</span> <span class="pr">bcrypt</span>.<span class="fn">compare</span>(<span class="pr">password</span>, <span class="pr">user</span>.<span class="pr">password</span>);
+        <span class="kw">if</span> (!<span class="pr">isValidPassword</span>) <span class="kw">return</span> <span class="kw2">null</span>;
+
+        <span class="cm">// Update last login timestamp</span>
+        <span class="kw">await</span> <span class="fn">updateUserLastLogin</span>(<span class="pr">user</span>.<span class="pr">id</span>);
+
+        <span class="kw">return</span> {
+          <span class="pr">id</span>: <span class="pr">user</span>.<span class="pr">id</span>,
+          <span class="pr">name</span>: <span class="str">`${user.first_name} ${user.last_name}`</span>,
+          <span class="pr">email</span>: <span class="pr">user</span>.<span class="pr">email</span>,
+          <span class="pr">role</span>: <span class="pr">user</span>.<span class="pr">role</span>,
+        };
+      },
+    }),
+  ],
+  <span class="pr">callbacks</span>: {
+    <span class="kw2">async</span> <span class="fn">jwt</span>({ <span class="pr">token</span>, <span class="pr">user</span> }) {
+      <span class="cm">// Add custom fields to JWT token on first sign in</span>
+      <span class="kw">if</span> (<span class="pr">user</span>) {
+        <span class="pr">token</span>.<span class="pr">id</span> = <span class="pr">user</span>.<span class="pr">id</span> <span class="kw">as</span> <span class="tp">string</span>;
+        <span class="pr">token</span>.<span class="pr">role</span> = <span class="pr">user</span>.<span class="pr">role</span>;
+      }
+      <span class="kw">return</span> <span class="pr">token</span>;
+    },
+    <span class="kw2">async</span> <span class="fn">session</span>({ <span class="pr">session</span>, <span class="pr">token</span> }) {
+      <span class="cm">// Add custom fields to session from JWT</span>
+      <span class="kw">if</span> (<span class="pr">session</span>.<span class="pr">user</span>) {
+        <span class="pr">session</span>.<span class="pr">user</span>.<span class="pr">id</span> = <span class="pr">token</span>.<span class="pr">id</span> <span class="kw">as</span> <span class="tp">string</span>;
+        <span class="pr">session</span>.<span class="pr">user</span>.<span class="pr">role</span> = <span class="pr">token</span>.<span class="pr">role</span> <span class="kw">as</span> <span class="tp">UserRole</span>;
+      }
+      <span class="kw">return</span> <span class="pr">session</span>;
+    },
+  },
+  <span class="pr">pages</span>: { <span class="pr">signIn</span>: <span class="str">&#39;/login&#39;</span> },
+  <span class="pr">session</span>: {
+    <span class="pr">strategy</span>: <span class="str">&#39;jwt&#39;</span>,
+    <span class="pr">maxAge</span>: <span class="num">24</span> * <span class="num">60</span> * <span class="num">60</span>,  <span class="cm">// 24 hours</span>
+  },
+  <span class="pr">trustHost</span>: <span class="kw2">true</span>,
+});
+
+<span class="cm">/**
+ * Role hierarchy for permission checks
+ */</span>
+<span class="kw">export const</span> <span class="pr">roleHierarchy</span> = {
+  <span class="pr">SUPER_ADMIN</span>: [<span class="str">&#39;SUPER_ADMIN&#39;</span>, <span class="str">&#39;ADMIN&#39;</span>, <span class="str">&#39;PATIENT&#39;</span>],
+  <span class="pr">ADMIN</span>: [<span class="str">&#39;ADMIN&#39;</span>, <span class="str">&#39;PATIENT&#39;</span>],
+  <span class="pr">PATIENT</span>: [<span class="str">&#39;PATIENT&#39;</span>],
+};
+</pre>
+</div>
+<div class="code-label">Image 3.1 — NextAuth.js: Authentication with Credentials Provider & JWT Sessions</div>
+
+<!-- 3.2 Bcrypt -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">src/app/api/users/route.ts</span>
+  </div>
+  <pre>
+<span class="cm">// Bcrypt Password Hashing — User Creation API</span>
+
+<span class="kw">import</span> <span class="pr">bcrypt</span> <span class="kw">from</span> <span class="str">&#39;bcryptjs&#39;</span>;
+<span class="kw">import</span> { <span class="fn">createUser</span> } <span class="kw">from</span> <span class="str">&#39;@/lib/queries/users&#39;</span>;
+<span class="kw">import</span> { <span class="fn">logAction</span> } <span class="kw">from</span> <span class="str">&#39;@/lib/audit-logger&#39;</span>;
+
+<span class="kw">export</span> <span class="kw2">async function</span> <span class="fn">POST</span>(<span class="pr">request</span>: <span class="tp">NextRequest</span>) {
+  <span class="cm">// ... auth & validation checks ...</span>
+
+  <span class="cm">// Hash password with bcrypt (cost factor 10)</span>
+  <span class="kw">const</span> <span class="pr">hashedPassword</span> = <span class="kw">await</span> <span class="pr">bcrypt</span>.<span class="fn">hash</span>(<span class="pr">validatedData</span>.<span class="pr">password</span>, <span class="num">10</span>);
+
+  <span class="cm">// Create user with hashed password</span>
+  <span class="kw">const</span> <span class="pr">userId</span> = <span class="kw">await</span> <span class="fn">createUser</span>({
+    <span class="pr">username</span>: <span class="pr">validatedData</span>.<span class="pr">username</span>,
+    <span class="pr">email</span>: <span class="pr">validatedData</span>.<span class="pr">email</span>,
+    <span class="pr">password</span>: <span class="pr">hashedPassword</span>,   <span class="cm">// stored as bcrypt hash, never plaintext</span>
+    <span class="pr">role</span>: <span class="pr">validatedData</span>.<span class="pr">role</span>,
+    <span class="pr">firstName</span>: <span class="pr">validatedData</span>.<span class="pr">firstName</span>,
+    <span class="pr">lastName</span>: <span class="pr">validatedData</span>.<span class="pr">lastName</span>,
+  });
+
+  <span class="cm">// Log user creation for compliance audit trail</span>
+  <span class="kw">await</span> <span class="fn">logAction</span>(<span class="pr">session</span>.<span class="pr">user</span>.<span class="pr">id</span>, <span class="str">&#39;CREATE&#39;</span>, <span class="str">&#39;users&#39;</span>, <span class="pr">userId</span>, <span class="kw2">null</span>, {
+    <span class="pr">username</span>: <span class="pr">validatedData</span>.<span class="pr">username</span>,
+    <span class="pr">role</span>: <span class="pr">validatedData</span>.<span class="pr">role</span>,
+  });
+
+  <span class="kw">return</span> <span class="tp">NextResponse</span>.<span class="fn">json</span>({ <span class="pr">userId</span> }, { <span class="pr">status</span>: <span class="num">201</span> });
+}
+
+<span class="cm">// ─── Password Verification (from src/lib/auth.ts) ───</span>
+
+<span class="cm">// Bcrypt compares plaintext password against stored hash</span>
+<span class="kw">const</span> <span class="pr">isValidPassword</span> = <span class="kw">await</span> <span class="pr">bcrypt</span>.<span class="fn">compare</span>(<span class="pr">password</span>, <span class="pr">user</span>.<span class="pr">password</span>);
+<span class="kw">if</span> (!<span class="pr">isValidPassword</span>) <span class="kw">return</span> <span class="kw2">null</span>;  <span class="cm">// Generic error for security</span>
+</pre>
+</div>
+<div class="code-label">Image 3.2 — Bcrypt: Password Hashing (Registration) & Verification (Login)</div>
+
+<!-- 3.3 RBAC -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">src/lib/rbac.ts</span>
+  </div>
+  <pre>
+<span class="cm">/**
+ * Role-Based Access Control (RBAC) Helpers
+ * Authorization utilities for managing user permissions and access control
+ */</span>
+
+<span class="kw">export</span> <span class="kw2">type</span> <span class="tp">UserRole</span> = <span class="str">&#39;SUPER_ADMIN&#39;</span> | <span class="str">&#39;ADMIN&#39;</span> | <span class="str">&#39;PATIENT&#39;</span>;
+
+<span class="cm">/**
+ * Check if user has one of the required roles
+ */</span>
+<span class="kw">export</span> <span class="kw2">function</span> <span class="fn">hasRole</span>(<span class="pr">userRole</span>: <span class="tp">UserRole</span>, <span class="pr">allowedRoles</span>: <span class="tp">UserRole</span>[]): <span class="tp">boolean</span> {
+  <span class="kw">return</span> <span class="pr">allowedRoles</span>.<span class="fn">includes</span>(<span class="pr">userRole</span>);
+}
+
+<span class="cm">/**
+ * Check if user is an administrator (SUPER_ADMIN or ADMIN)
+ */</span>
+<span class="kw">export</span> <span class="kw2">function</span> <span class="fn">isAdmin</span>(<span class="pr">role</span>: <span class="tp">UserRole</span>): <span class="tp">boolean</span> {
+  <span class="kw">return</span> <span class="pr">role</span> === <span class="str">&#39;SUPER_ADMIN&#39;</span> || <span class="pr">role</span> === <span class="str">&#39;ADMIN&#39;</span>;
+}
+
+<span class="cm">/**
+ * Check if user is a patient
+ */</span>
+<span class="kw">export</span> <span class="kw2">function</span> <span class="fn">isPatient</span>(<span class="pr">role</span>: <span class="tp">UserRole</span>): <span class="tp">boolean</span> {
+  <span class="kw">return</span> <span class="pr">role</span> === <span class="str">&#39;PATIENT&#39;</span>;
+}
+
+<span class="cm">/**
+ * Check if user can access a specific student record
+ * - SUPER_ADMIN and ADMIN can access any student
+ * - PATIENT can only access their own student record
+ */</span>
+<span class="kw">export</span> <span class="kw2">function</span> <span class="fn">canAccessStudent</span>(
+  <span class="pr">userRole</span>: <span class="tp">UserRole</span>,
+  <span class="pr">userId</span>: <span class="tp">string</span>,
+  <span class="pr">studentUserId</span>?: <span class="tp">string</span> | <span class="kw2">null</span>
+): <span class="tp">boolean</span> {
+  <span class="cm">// Admins can access all students</span>
+  <span class="kw">if</span> (<span class="fn">isAdmin</span>(<span class="pr">userRole</span>)) <span class="kw">return</span> <span class="kw2">true</span>;
+
+  <span class="cm">// Patients can only access their own record</span>
+  <span class="kw">if</span> (<span class="fn">isPatient</span>(<span class="pr">userRole</span>)) <span class="kw">return</span> <span class="pr">userId</span> === <span class="pr">studentUserId</span>;
+
+  <span class="cm">// Default: deny access</span>
+  <span class="kw">return</span> <span class="kw2">false</span>;
+}
+</pre>
+</div>
+<div class="code-label">Image 3.3 — RBAC: Role-Based Access Control with Ownership Checks</div>
+
+<!-- 3.4 Middleware -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">src/middleware.ts</span>
+  </div>
+  <pre>
+<span class="kw">import</span> { <span class="tp">NextResponse</span> } <span class="kw">from</span> <span class="str">&#39;next/server&#39;</span>;
+<span class="kw">import</span> <span class="kw2">type</span> { <span class="tp">NextRequest</span> } <span class="kw">from</span> <span class="str">&#39;next/server&#39;</span>;
+<span class="kw">import</span> { <span class="pr">auth</span> } <span class="kw">from</span> <span class="str">&#39;@/lib/auth&#39;</span>;
+
+<span class="kw">export</span> <span class="kw2">async function</span> <span class="fn">middleware</span>(<span class="pr">request</span>: <span class="tp">NextRequest</span>) {
+  <span class="kw">const</span> { <span class="pr">pathname</span> } = <span class="pr">request</span>.<span class="pr">nextUrl</span>;
+
+  <span class="cm">// Get the session (Edge Runtime compatible)</span>
+  <span class="kw">const</span> <span class="pr">session</span> = <span class="kw">await</span> <span class="fn">auth</span>();
+  <span class="kw">const</span> <span class="pr">isLoggedIn</span> = !!<span class="pr">session</span>?.<span class="pr">user</span>;
+  <span class="kw">const</span> <span class="pr">userRole</span> = <span class="pr">session</span>?.<span class="pr">user</span>?.<span class="pr">role</span>;
+
+  <span class="cm">// Redirect to login if not authenticated</span>
+  <span class="kw">if</span> (!<span class="pr">isLoggedIn</span>) {
+    <span class="kw">const</span> <span class="pr">loginUrl</span> = <span class="kw">new</span> <span class="tp">URL</span>(<span class="str">&#39;/login&#39;</span>, <span class="pr">request</span>.<span class="pr">url</span>);
+    <span class="pr">loginUrl</span>.<span class="pr">searchParams</span>.<span class="fn">set</span>(<span class="str">&#39;callbackUrl&#39;</span>, <span class="pr">pathname</span>);
+    <span class="kw">return</span> <span class="tp">NextResponse</span>.<span class="fn">redirect</span>(<span class="pr">loginUrl</span>);
+  }
+
+  <span class="cm">// Admin-only routes (block patients)</span>
+  <span class="kw">const</span> <span class="pr">adminOnlyRoutes</span> = [<span class="str">&#39;/patients&#39;</span>, <span class="str">&#39;/registration&#39;</span>, <span class="str">&#39;/statistics&#39;</span>, <span class="str">&#39;/alerts&#39;</span>, <span class="str">&#39;/medical-records&#39;</span>];
+  <span class="kw">const</span> <span class="pr">isAdminRoute</span> = <span class="pr">adminOnlyRoutes</span>.<span class="fn">some</span>(<span class="pr">route</span> =&gt; <span class="pr">pathname</span>.<span class="fn">startsWith</span>(<span class="pr">route</span>));
+
+  <span class="kw">if</span> (<span class="pr">isAdminRoute</span> && <span class="pr">userRole</span> === <span class="str">&#39;PATIENT&#39;</span>) {
+    <span class="kw">return</span> <span class="tp">NextResponse</span>.<span class="fn">redirect</span>(<span class="kw">new</span> <span class="tp">URL</span>(<span class="str">&#39;/patient-portal&#39;</span>, <span class="pr">request</span>.<span class="pr">url</span>));
+  }
+
+  <span class="cm">// Dashboard route - redirect patients to patient portal</span>
+  <span class="kw">if</span> (<span class="pr">pathname</span>.<span class="fn">startsWith</span>(<span class="str">&#39;/dashboard&#39;</span>) && <span class="pr">userRole</span> === <span class="str">&#39;PATIENT&#39;</span>) {
+    <span class="kw">return</span> <span class="tp">NextResponse</span>.<span class="fn">redirect</span>(<span class="kw">new</span> <span class="tp">URL</span>(<span class="str">&#39;/patient-portal&#39;</span>, <span class="pr">request</span>.<span class="pr">url</span>));
+  }
+
+  <span class="kw">return</span> <span class="tp">NextResponse</span>.<span class="fn">next</span>();
+}
+</pre>
+</div>
+<div class="code-label">Image 3.4 — Route Protection Middleware: Authentication & Role-Based Access</div>
+
+<!-- ==================== SECTION 4: INFRASTRUCTURE ==================== -->
+<div class="section-header">4. Infrastructure & Code Management</div>
+
+<!-- 4.1 Aiven (reuses db.ts but focused view) -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">src/lib/db.ts — Aiven Cloud MySQL Configuration</span>
+  </div>
+  <pre>
+<span class="kw">import</span> <span class="pr">mysql</span>, { <span class="tp">Pool</span> } <span class="kw">from</span> <span class="str">&#39;mysql2/promise&#39;</span>;
+
+<span class="cm">// Create connection pool with Aiven Cloud MySQL settings</span>
+<span class="kw">const</span> <span class="pr">pool</span>: <span class="tp">Pool</span> = <span class="pr">mysql</span>.<span class="fn">createPool</span>({
+  <span class="pr">host</span>: <span class="pr">process</span>.<span class="pr">env</span>.<span class="pr">DB_HOST</span>,         <span class="cm">// *.aivencloud.com</span>
+  <span class="pr">port</span>: <span class="fn">parseInt</span>(<span class="pr">process</span>.<span class="pr">env</span>.<span class="pr">DB_PORT</span> || <span class="str">&#39;3306&#39;</span>),
+  <span class="pr">user</span>: <span class="pr">process</span>.<span class="pr">env</span>.<span class="pr">DB_USER</span>,         <span class="cm">// avnadmin</span>
+  <span class="pr">password</span>: <span class="pr">process</span>.<span class="pr">env</span>.<span class="pr">DB_PASSWORD</span>,
+  <span class="pr">database</span>: <span class="pr">process</span>.<span class="pr">env</span>.<span class="pr">DB_NAME</span>,     <span class="cm">// defaultdb</span>
+  <span class="pr">waitForConnections</span>: <span class="kw2">true</span>,
+  <span class="pr">connectionLimit</span>: <span class="num">5</span>,               <span class="cm">// Aiven free tier connection limit</span>
+  <span class="pr">enableKeepAlive</span>: <span class="kw2">true</span>,
+  <span class="pr">ssl</span>: {
+    <span class="pr">rejectUnauthorized</span>: <span class="kw2">false</span>       <span class="cm">// Required for Aiven&#39;s managed SSL</span>
+  }
+});
+
+<span class="cm">// Verify database connection on startup</span>
+<span class="pr">pool</span>.<span class="fn">getConnection</span>()
+  .<span class="fn">then</span>(<span class="pr">connection</span> =&gt; {
+    <span class="pr">console</span>.<span class="fn">log</span>(<span class="str">&#39;Database connected successfully&#39;</span>);
+    <span class="pr">connection</span>.<span class="fn">release</span>();
+  })
+  .<span class="fn">catch</span>(<span class="pr">err</span> =&gt; {
+    <span class="pr">console</span>.<span class="fn">error</span>(<span class="str">&#39;Database connection failed:&#39;</span>, <span class="pr">err</span>.<span class="pr">message</span>);
+  });
+</pre>
+</div>
+<div class="code-label">Image 4.1 — Aiven: Cloud MySQL Database Connection with SSL</div>
+
+<!-- 4.2 Vercel / Next.js Config -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">next.config.ts — Vercel Deployment Configuration</span>
+  </div>
+  <pre>
+<span class="kw">import</span> <span class="kw2">type</span> { <span class="tp">NextConfig</span> } <span class="kw">from</span> <span class="str">&quot;next&quot;</span>;
+
+<span class="kw">const</span> <span class="pr">nextConfig</span>: <span class="tp">NextConfig</span> = {
+  <span class="cm">// Enable compression for faster loading</span>
+  <span class="pr">compress</span>: <span class="kw2">true</span>,
+
+  <span class="cm">// Image optimization (Vercel Image CDN)</span>
+  <span class="pr">images</span>: {
+    <span class="pr">formats</span>: [<span class="str">&#39;image/avif&#39;</span>, <span class="str">&#39;image/webp&#39;</span>],
+    <span class="pr">deviceSizes</span>: [<span class="num">640</span>, <span class="num">750</span>, <span class="num">828</span>, <span class="num">1080</span>, <span class="num">1200</span>, <span class="num">1920</span>, <span class="num">2048</span>],
+    <span class="pr">minimumCacheTTL</span>: <span class="num">60</span>,
+  },
+
+  <span class="cm">// Security headers (applied at Vercel edge/CDN level)</span>
+  <span class="kw2">async</span> <span class="fn">headers</span>() {
+    <span class="kw">return</span> [{
+      <span class="pr">source</span>: <span class="str">&#39;/:path*&#39;</span>,
+      <span class="pr">headers</span>: [
+        { <span class="pr">key</span>: <span class="str">&#39;X-DNS-Prefetch-Control&#39;</span>, <span class="pr">value</span>: <span class="str">&#39;on&#39;</span> },
+        { <span class="pr">key</span>: <span class="str">&#39;X-Frame-Options&#39;</span>,        <span class="pr">value</span>: <span class="str">&#39;SAMEORIGIN&#39;</span> },
+        { <span class="pr">key</span>: <span class="str">&#39;X-Content-Type-Options&#39;</span>, <span class="pr">value</span>: <span class="str">&#39;nosniff&#39;</span> },
+        { <span class="pr">key</span>: <span class="str">&#39;Referrer-Policy&#39;</span>,       <span class="pr">value</span>: <span class="str">&#39;strict-origin-when-cross-origin&#39;</span> },
+      ],
+    }];
+  },
+
+  <span class="pr">reactStrictMode</span>: <span class="kw2">true</span>,
+  <span class="pr">poweredByHeader</span>: <span class="kw2">false</span>,  <span class="cm">// Remove X-Powered-By for security</span>
+
+  <span class="pr">experimental</span>: {
+    <span class="pr">optimizeCss</span>: <span class="kw2">true</span>,
+    <span class="pr">optimizePackageImports</span>: [<span class="str">&#39;lucide-react&#39;</span>, <span class="str">&#39;recharts&#39;</span>],
+  },
+};
+
+<span class="kw">export default</span> <span class="pr">nextConfig</span>;
+</pre>
+</div>
+<div class="code-label">Image 4.2 — Vercel: Next.js Deployment Config with Security Headers & Optimization</div>
+
+<!-- 4.3 GitHub / package.json -->
+<div class="code-card">
+  <div class="code-card-header">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="filename">package.json — Project Dependencies (Technology Stack)</span>
+  </div>
+  <pre>
+{
+  <span class="attr">&quot;name&quot;</span>: <span class="str">&quot;medicare-app&quot;</span>,
+  <span class="attr">&quot;version&quot;</span>: <span class="str">&quot;0.1.0&quot;</span>,
+  <span class="attr">&quot;private&quot;</span>: <span class="kw2">true</span>,
+  <span class="attr">&quot;scripts&quot;</span>: {
+    <span class="attr">&quot;dev&quot;</span>: <span class="str">&quot;next dev&quot;</span>,
+    <span class="attr">&quot;build&quot;</span>: <span class="str">&quot;next build&quot;</span>,
+    <span class="attr">&quot;start&quot;</span>: <span class="str">&quot;next start&quot;</span>,
+    <span class="attr">&quot;lint&quot;</span>: <span class="str">&quot;eslint&quot;</span>
+  },
+  <span class="attr">&quot;dependencies&quot;</span>: {
+    <span class="attr">&quot;bcryptjs&quot;</span>: <span class="str">&quot;^3.0.3&quot;</span>,            <span class="cm">// Password encryption</span>
+    <span class="attr">&quot;lucide-react&quot;</span>: <span class="str">&quot;^0.562.0&quot;</span>,       <span class="cm">// Icons</span>
+    <span class="attr">&quot;mysql2&quot;</span>: <span class="str">&quot;^3.16.0&quot;</span>,              <span class="cm">// MySQL database driver</span>
+    <span class="attr">&quot;next&quot;</span>: <span class="str">&quot;16.1.1&quot;</span>,                <span class="cm">// Next.js framework</span>
+    <span class="attr">&quot;next-auth&quot;</span>: <span class="str">&quot;^5.0.0-beta.30&quot;</span>,   <span class="cm">// Authentication (NextAuth v5)</span>
+    <span class="attr">&quot;react&quot;</span>: <span class="str">&quot;19.2.3&quot;</span>,               <span class="cm">// React UI library</span>
+    <span class="attr">&quot;react-dom&quot;</span>: <span class="str">&quot;19.2.3&quot;</span>,           <span class="cm">// React DOM rendering</span>
+    <span class="attr">&quot;react-hook-form&quot;</span>: <span class="str">&quot;^7.70.0&quot;</span>,    <span class="cm">// Form management</span>
+    <span class="attr">&quot;recharts&quot;</span>: <span class="str">&quot;^3.6.0&quot;</span>,            <span class="cm">// Charts & statistics</span>
+    <span class="attr">&quot;swr&quot;</span>: <span class="str">&quot;^2.3.8&quot;</span>,                 <span class="cm">// Real-time data fetching</span>
+    <span class="attr">&quot;zod&quot;</span>: <span class="str">&quot;^4.3.5&quot;</span>,                 <span class="cm">// Schema validation</span>
+    <span class="attr">&quot;@radix-ui/react-dialog&quot;</span>: <span class="str">&quot;^1.1.15&quot;</span>,  <span class="cm">// UI components</span>
+    <span class="attr">&quot;@radix-ui/react-select&quot;</span>: <span class="str">&quot;^2.2.6&quot;</span>,
+    <span class="attr">&quot;@radix-ui/react-tabs&quot;</span>: <span class="str">&quot;^1.1.13&quot;</span>,
+    <span class="attr">&quot;tailwind-merge&quot;</span>: <span class="str">&quot;^3.4.0&quot;</span>,      <span class="cm">// Tailwind CSS utilities</span>
+    <span class="attr">&quot;jspdf&quot;</span>: <span class="str">&quot;^4.2.0&quot;</span>,               <span class="cm">// PDF generation</span>
+    <span class="attr">&quot;date-fns&quot;</span>: <span class="str">&quot;^4.1.0&quot;</span>             <span class="cm">// Date formatting</span>
+  },
+  <span class="attr">&quot;devDependencies&quot;</span>: {
+    <span class="attr">&quot;tailwindcss&quot;</span>: <span class="str">&quot;^4&quot;</span>,             <span class="cm">// Tailwind CSS framework</span>
+    <span class="attr">&quot;typescript&quot;</span>: <span class="str">&quot;^5&quot;</span>,              <span class="cm">// TypeScript compiler</span>
+    <span class="attr">&quot;@types/react&quot;</span>: <span class="str">&quot;^19&quot;</span>,          <span class="cm">// TypeScript type definitions</span>
+    <span class="attr">&quot;eslint&quot;</span>: <span class="str">&quot;^9&quot;</span>,                 <span class="cm">// Code linting</span>
+    <span class="attr">&quot;eslint-config-next&quot;</span>: <span class="str">&quot;16.1.1&quot;</span>  <span class="cm">// Next.js ESLint rules</span>
+  }
+}
+</pre>
+</div>
+<div class="code-label">Image 4.3 — GitHub Repository: Project Dependencies & Technology Stack</div>
+
+</body>
+</html>

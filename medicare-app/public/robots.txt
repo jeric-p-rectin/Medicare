@@ -1,14 +1,34 @@
+# ─── MED-Alert robots.txt ───────────────────────────────────────────────────
+# Allow all crawlers to index the public landing page.
+# Block authenticated/private app routes.
+
 User-agent: *
 Allow: /
+Allow: /login
+Allow: /registration
 Allow: /logo.png
-Disallow: /dashboard
-Disallow: /login
-Disallow: /patient-portal
-Disallow: /registration
-Disallow: /patients
-Disallow: /alerts
-Disallow: /statistics
-Disallow: /account
+Allow: /og-image.png
+
+# Private app routes — never index
+Disallow: /dashboard/
+Disallow: /patient-portal/
+Disallow: /patients/
+Disallow: /alerts/
+Disallow: /statistics/
+Disallow: /account/
 Disallow: /api/
 
+# GPTBot (OpenAI crawler) — block to protect patient data logic
+User-agent: GPTBot
+Disallow: /
+
+# Google-Extended (Google AI training) — block
+User-agent: Google-Extended
+Disallow: /
+
+# CCBot (Common Crawl)
+User-agent: CCBot
+Disallow: /
+
+# Sitemap
 Sitemap: https://medalertportal.com/sitemap.xml
